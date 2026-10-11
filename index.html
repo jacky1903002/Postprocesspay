@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>後處理論件計酬金額統計系統</title>
+    <title>後處理論件計酬金額統計系統 - 企業商業版</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 圖標 -->
@@ -13,183 +13,207 @@
     <!-- Chart.js (圖表與 PNG 匯出) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .login-container { max-width: 400px; margin-top: 10vh; }
+        body { background-color: #f4f6f9; font-family: "Microsoft JhengHei", Arial, sans-serif; }
+        .login-container { max-width: 420px; margin-top: 10vh; }
         .app-container { display: none; }
-        /* 縮小儀表板卡片為 1/2 大小 */
-        .dashboard-card { padding: 10px 15px !important; }
-        .dashboard-card h6 { font-size: 0.85rem; margin-bottom: 2px; }
-        .dashboard-card h3 { font-size: 1.35rem; }
+        /* 商業活潑風格：字體加粗、深白色質感卡片 */
+        .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .fw-heavy { font-weight: 700 !important; }
+        /* 縮小卡片為 1/2 大小 */
+        .dashboard-card { padding: 8px 12px !important; }
+        .dashboard-card h6 { font-size: 0.8rem; margin-bottom: 2px; font-weight: 700; color: #495057; }
+        .dashboard-card h3 { font-size: 1.25rem; font-weight: 800; }
+        /* 表格填滿全螢幕感 */
+        .table-fullscreen-container { min-height: 70vh; max-height: 75vh; overflow-y: auto; }
+        /* 全螢幕圖表 Modal 樣式 */
+        .modal-fullscreen .modal-content { background-color: #f8f9fa; }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
     <!-- 1. 登入畫面 (Firebase Auth) -->
     <div id="loginSection" class="container login-container">
-        <div class="card shadow border-0">
+        <div class="card shadow-lg p-3">
             <div class="card-body p-4">
-                <h3 class="text-center mb-4 text-primary"><i class="fa-solid fa-lock"></i> 系統登入</h3>
-                <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+                <h3 class="text-center mb-4 text-primary fw-heavy"><i class="fa-solid fa-shield-halved"></i> 系統安全登入</h3>
+                <div id="loginError" class="alert alert-danger d-none fw-heavy" role="alert"></div>
                 <form id="loginForm">
                     <div class="mb-3">
-                        <label class="form-label">電子郵件帳號</label>
-                        <input type="email" class="form-control" id="loginEmail" required placeholder="name@example.com">
+                        <label class="form-label fw-heavy text-dark">電子郵件帳號</label>
+                        <input type="email" class="form-control fw-heavy" id="loginEmail" required placeholder="name@example.com">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">密碼</label>
-                        <input type="password" class="form-control" id="loginPassword" required placeholder="密碼">
+                        <label class="form-label fw-heavy text-dark">密碼</label>
+                        <input type="password" class="form-control fw-heavy" id="loginPassword" required placeholder="密碼">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 py-2">登入系統</button>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-heavy shadow-sm">立即登入系統</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- 2. 主系統畫面 -->
+    <!-- 2. 主系統畫面 (企業商業滿版) -->
     <div id="appSection" class="container-fluid px-4 py-3 app-container">
         <!-- 頂部導覽列 / 狀態列 -->
-        <div class="row align-items-center mb-3 bg-white p-3 rounded shadow-sm mx-0">
+        <div class="row align-items-center mb-3 bg-white p-3 rounded shadow-sm mx-0 border-start border-4 border-primary">
             <div class="col-md-4">
-                <h4 class="mb-0 text-primary"><i class="fa-solid fa-calculator"></i> 後處理論件計酬統計系統</h4>
+                <h4 class="mb-0 text-primary fw-heavy"><i class="fa-solid fa-chart-line"></i> 後處理論件計酬統計系統</h4>
             </div>
             <div class="col-md-4 text-center">
-                <span id="connectionStatus" class="badge bg-secondary p-2 me-2">檢查連線中...</span>
-                <span id="lastSaveTime" class="text-muted small">上次儲存：無</span>
+                <span id="connectionStatus" class="badge bg-success p-2 me-2 fw-heavy">檢查連線中...</span>
+                <span id="lastSaveTime" class="text-dark small fw-heavy">上次儲存：無</span>
             </div>
             <div class="col-md-4 text-end">
-                <span id="userDisplayEmail" class="me-3 text-secondary small fw-bold"></span>
-                <button id="logoutBtn" class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-right-from-bracket"></i> 登出</button>
+                <span id="userDisplayEmail" class="me-3 text-dark small fw-heavy"></span>
+                <button id="logoutBtn" class="btn btn-outline-danger btn-sm fw-heavy"><i class="fa-solid fa-right-from-bracket"></i> 登出</button>
             </div>
         </div>
 
-        <!-- 頂部功能按鈕與儀表板 (針對當前分頁或全域) -->
+        <!-- 頂部功能按鈕與儀表板 -->
         <div class="row g-2 mb-3 align-items-center">
             <!-- 儀表板 1/2 大小 -->
-            <div class="col-md-8">
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <div class="card shadow-sm border-0 bg-primary text-white dashboard-card">
+            <div class="col-xl-7 col-lg-8">
+                <div class="row g-2" id="dashboardCardsRow">
+                    <div class="col-4">
+                        <div class="card bg-white text-primary dashboard-card border border-primary">
                             <div class="card-body p-2">
-                                <h6 class="card-title">累積完成產品總數</h6>
-                                <h3 id="totalCompletedCount" class="fw-bold mb-0">0</h3>
+                                <h6 class="card-title text-muted">累積完成產品總數</h6>
+                                <h3 id="totalCompletedCount" class="fw-heavy mb-0 text-dark">0</h3>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm border-0 bg-success text-white dashboard-card">
+                    <div class="col-4">
+                        <div class="card bg-white text-success dashboard-card border border-success">
                             <div class="card-body p-2">
-                                <h6 class="card-title">實際總發放金額 (NT$)</h6>
-                                <h3 id="totalActualPrice" class="fw-bold mb-0">$0</h3>
+                                <h6 class="card-title text-muted">實際總發放金額</h6>
+                                <h3 id="totalActualPrice" class="fw-heavy mb-0 text-success">$0</h3>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card shadow-sm border-0 bg-info text-white dashboard-card">
+                    <div class="col-4">
+                        <div class="card bg-white text-info dashboard-card border border-info">
                             <div class="card-body p-2">
-                                <h6 class="card-title">預計總金額 (NT$)</h6>
-                                <h3 id="totalEstimatedPrice" class="fw-bold mb-0">$0</h3>
+                                <h6 class="card-title text-muted">預計總金額</h6>
+                                <h3 id="totalEstimatedPrice" class="fw-heavy mb-0 text-info">$0</h3>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- 功能按鈕 -->
-            <div class="col-md-4 text-end">
+            <!-- 功能按鈕群 -->
+            <div class="col-xl-5 col-lg-4 text-end">
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
-                    <button class="btn btn-success btn-sm" id="addNewRecordBtn" data-bs-toggle="modal" data-bs-target="#addModal">
+                    <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#chartsModal">
+                        <i class="fa-solid fa-chart-pie"></i> 生成 6 張分析圖表 (全螢幕)
+                    </button>
+                    <button class="btn btn-success btn-sm fw-heavy px-3 shadow-sm" id="addNewRecordBtn" data-bs-toggle="modal" data-bs-target="#addModal">
                         <i class="fa-solid fa-plus"></i> 新增記錄
                     </button>
-                    <label class="btn btn-warning btn-sm mb-0 text-dark" style="cursor: pointer;">
+                    <label class="btn btn-warning btn-sm fw-heavy px-3 text-dark shadow-sm mb-0" style="cursor: pointer;">
                         <i class="fa-solid fa-file-excel"></i> 匯入 Excel
                         <input type="file" id="excelFileinput" accept=".xlsx, .xls" class="d-none">
                     </label>
-                    <button class="btn btn-secondary btn-sm" id="exportExcelBtn">
+                    <button class="btn btn-secondary btn-sm fw-heavy px-3 shadow-sm" id="exportExcelBtn">
                         <i class="fa-solid fa-file-arrow-down"></i> 匯出 Excel
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 工作表標籤列 (含「入金管理」分頁) -->
-        <ul class="nav nav-tabs mb-2" id="sheetTabs">
+        <!-- 工作表標籤列 -->
+        <ul class="nav nav-tabs mb-2 fw-heavy" id="sheetTabs">
             <!-- 動態產生 -->
         </ul>
 
-        <!-- 全螢幕最大化表格區域 / 或者是入金管理頁面 -->
-        <div id="mainContentArea" class="card shadow-sm border-0 mb-4 w-100">
-            <div class="card-body p-2">
-                <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
-                    <table class="table table-hover table-striped align-middle mb-0" id="dynamicTable">
-                        <thead class="table-dark sticky-top" id="tableHeader">
+        <!-- 全螢幕滿版資料表格區域 -->
+        <div class="card shadow-sm border-0 mb-4 w-100 bg-white">
+            <div class="card-body p-3">
+                <div class="table-responsive table-fullscreen-container">
+                    <table class="table table-hover table-bordered align-middle mb-0" id="dynamicTable">
+                        <thead class="table-dark sticky-top" id="tableHeader" style="font-size: 0.95rem;">
                             <!-- 動態表頭 -->
                         </thead>
-                        <tbody id="workTableBody">
+                        <tbody id="workTableBody" class="fw-heavy" style="font-size: 0.95rem;">
                             <!-- 動態內容 -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 6張分析圖表區塊 -->
-        <div class="row g-3 mb-5">
-            <div class="col-xl-4 col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 text-secondary">累積完成品號數量</h6>
-                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart1', '累積完成品號數量.png')"><i class="fa-solid fa-download"></i></button>
-                    </div>
-                    <div class="card-body p-2"><canvas id="chart1" height="130"></canvas></div>
+    <!-- 3. 6張分析圖表全螢幕彈窗 Modal -->
+    <div class="modal fade modal-fullscreen" id="chartsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-heavy"><i class="fa-solid fa-chart-column"></i> 後處理論件計酬 - 6 張商業分析圖表 (全螢幕)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 text-secondary">累計實際發放金額</h6>
-                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart2', '累計實際發放金額.png')"><i class="fa-solid fa-download"></i></button>
+                <div class="modal-body bg-light p-4">
+                    <div class="row g-4">
+                        <div class="col-xl-4 col-md-6">
+                            <div class="card shadow h-100">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                                    <h6 class="mb-0 fw-heavy text-dark">1. 累積完成品號數量</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart1', '累積完成品號數量.png')"><i class="fa-solid fa-download"></i></button>
+                                </div>
+                                <div class="card-body p-3"><canvas id="chart1" height="220"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6">
+                            <div class="card shadow h-100">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                                    <h6 class="mb-0 fw-heavy text-dark">2. 累計實際發放金額</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart2', '累計實際發放金額.png')"><i class="fa-solid fa-download"></i></button>
+                                </div>
+                                <div class="card-body p-3"><canvas id="chart2" height="220"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6">
+                            <div class="card shadow h-100">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                                    <h6 class="mb-0 fw-heavy text-dark">3. 作業人員累積發放金額</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart3', '作業人員累積發放金額.png')"><i class="fa-solid fa-download"></i></button>
+                                </div>
+                                <div class="card-body p-3"><canvas id="chart3" height="220"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6">
+                            <div class="card shadow h-100">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                                    <h6 class="mb-0 fw-heavy text-dark">4. 累積實際總發放金額</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart4', '累積實際總發放金額.png')"><i class="fa-solid fa-download"></i></button>
+                                </div>
+                                <div class="card-body p-3"><canvas id="chart4" height="220"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6">
+                            <div class="card shadow h-100">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                                    <h6 class="mb-0 fw-heavy text-dark">5. 各分頁完成率統計</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart5', '各分頁完成率統計.png')"><i class="fa-solid fa-download"></i></button>
+                                </div>
+                                <div class="card-body p-3"><canvas id="chart5" height="220"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-md-6">
+                            <div class="card shadow h-100">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                                    <h6 class="mb-0 fw-heavy text-dark">6. 累計工時 (工時×實際完成數)</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart6', '累計工時統計.png')"><i class="fa-solid fa-download"></i></button>
+                                </div>
+                                <div class="card-body p-3"><canvas id="chart6" height="220"></canvas></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body p-2"><canvas id="chart2" height="130"></canvas></div>
                 </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 text-secondary">作業人員累積發放金額</h6>
-                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart3', '作業人員累積發放金額.png')"><i class="fa-solid fa-download"></i></button>
-                    </div>
-                    <div class="card-body p-2"><canvas id="chart3" height="130"></canvas></div>
+                <div class="modal-footer bg-white justify-content-between">
+                    <button class="btn btn-dark fw-heavy px-4" id="exportAllChartsBtn">
+                        <i class="fa-solid fa-file-image"></i> 一鍵匯出所有 6 張圖表 (PNG)
+                    </button>
+                    <button type="button" class="btn btn-secondary fw-heavy px-4" data-bs-dismiss="modal">關閉視窗</button>
                 </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 text-secondary">累積實際總發放金額</h6>
-                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart4', '累積實際總發放金額.png')"><i class="fa-solid fa-download"></i></button>
-                    </div>
-                    <div class="card-body p-2"><canvas id="chart4" height="130"></canvas></div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 text-secondary">各分頁完成率統計</h6>
-                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart5', '各分頁完成率統計.png')"><i class="fa-solid fa-download"></i></button>
-                    </div>
-                    <div class="card-body p-2"><canvas id="chart5" height="130"></canvas></div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
-                        <h6 class="mb-0 text-secondary">累計工時 (工時×實際完成數)</h6>
-                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart6', '累計工時統計.png')"><i class="fa-solid fa-download"></i></button>
-                    </div>
-                    <div class="card-body p-2"><canvas id="chart6" height="130"></canvas></div>
-                </div>
-            </div>
-            <div class="col-12 text-center mt-1">
-                <button class="btn btn-dark btn-sm px-4" id="exportAllChartsBtn">
-                    <i class="fa-solid fa-file-image"></i> 一鍵匯出所有 6 張圖表 (PNG)
-                </button>
             </div>
         </div>
     </div>
@@ -197,68 +221,68 @@
     <!-- 新增 / 編輯資料 Modal -->
     <div class="modal fade" id="addModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+            <div class="modal-content shadow">
                 <form id="workForm">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">新增後處理工單記錄</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-heavy" id="modalTitle">新增後處理工單記錄</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-4">
                         <input type="hidden" id="editRowKey">
                         <div class="row">
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">品號</label>
-                                <input type="text" class="form-control" id="itemNo" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">品號</label>
+                                <input type="text" class="form-control fw-heavy" id="itemNo" required>
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">貨號</label>
-                                <input type="text" class="form-control" id="goodsNo" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">貨號</label>
+                                <input type="text" class="form-control fw-heavy" id="goodsNo" required>
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">工單號碼</label>
-                                <input type="text" class="form-control" id="workOrder" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">數量 (預計數量)</label>
-                                <input type="number" class="form-control" id="quantity" required min="0">
-                            </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">後處理工時 (H)</label>
-                                <input type="number" step="any" class="form-control" id="workHours" required min="0" placeholder="只能填數字">
-                                <div class="form-text text-danger" id="hourError" style="display:none;">只能填數字！</div>
-                            </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">單價 <small class="text-muted">(250*工時)</small></label>
-                                <input type="number" class="form-control bg-light" id="unitPrice" readonly>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">工單號碼</label>
+                                <input type="text" class="form-control fw-heavy" id="workOrder" required>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">作業人員</label>
-                                <input type="text" class="form-control" id="operator" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">數量 (預計數量)</label>
+                                <input type="number" class="form-control fw-heavy" id="quantity" required min="0">
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">實際完成數</label>
-                                <input type="number" class="form-control" id="actualCompleted" required min="0">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">後處理工時 (H)</label>
+                                <input type="number" step="any" class="form-control fw-heavy" id="workHours" required min="0" placeholder="只能填數字">
+                                <div class="form-text text-danger fw-heavy" id="hourError" style="display:none;">只能填數字！</div>
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">備註</label>
-                                <input type="text" class="form-control" id="remark">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">單價 <small class="text-muted">(250*工時)</small></label>
+                                <input type="number" class="form-control bg-light fw-heavy" id="unitPrice" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">作業人員</label>
+                                <input type="text" class="form-control fw-heavy" id="operator" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">實際完成數</label>
+                                <input type="number" class="form-control fw-heavy" id="actualCompleted" required min="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-heavy">備註</label>
+                                <input type="text" class="form-control fw-heavy" id="remark">
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer py-1">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary btn-sm">儲存記錄</button>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary fw-heavy px-4" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary fw-heavy px-4">儲存記錄</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK 10 Modular 與系統邏輯 -->
+    <!-- Firebase SDK 10 Modular 與商業邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -289,17 +313,16 @@
 
         let currentSheet = "W1";
         let allDataCache = {};
-        let depositsCache = {}; // 存放「入金管理」資料
+        let depositsCache = {};
         let chartInstances = {};
 
-        // 連線狀態監控
         onValue(ref(db, ".info/connected"), (snap) => {
             if (snap.val() === true) {
                 connectionStatus.textContent = "已連線 Realtime DB";
-                connectionStatus.className = "badge bg-success p-2 me-2";
+                connectionStatus.className = "badge bg-success p-2 me-2 fw-heavy";
             } else {
                 connectionStatus.textContent = "連線中斷...";
-                connectionStatus.className = "badge bg-danger p-2 me-2";
+                connectionStatus.className = "badge bg-danger p-2 me-2 fw-heavy";
             }
         });
 
@@ -329,7 +352,6 @@
         logoutBtn.addEventListener("click", () => signOut(auth));
 
         function initRealtimeSync() {
-            // 同步工作表資料
             onValue(ref(db, "sheets"), (snapshot) => {
                 if (snapshot.exists()) {
                     allDataCache = snapshot.val();
@@ -349,7 +371,6 @@
                 renderApp();
             });
 
-            // 同步入金資料
             onValue(ref(db, "deposits"), (snapshot) => {
                 if (snapshot.exists()) {
                     depositsCache = snapshot.val();
@@ -368,7 +389,6 @@
             lastSaveTimeEl.textContent = "上次儲存：" + new Date().toLocaleString();
         }
 
-        // 工時即時計算單價
         const workHoursInput = document.getElementById("workHours");
         const unitPriceInput = document.getElementById("unitPrice");
         const hourError = document.getElementById("hourError");
@@ -395,25 +415,21 @@
             const sheetTabs = document.getElementById("sheetTabs");
             sheetTabs.innerHTML = "";
             
-            // 正常工作表分頁
-            const sheetNames = Object.keys(allDataCache);
-            sheetNames.forEach(name => {
+            Object.keys(allDataCache).forEach(name => {
                 const li = document.createElement("li");
                 li.className = "nav-item";
-                li.innerHTML = `<button class="nav-link ${name === currentSheet ? 'active fw-bold' : ''}" onclick="switchSheet('${name}')">${name}</button>`;
+                li.innerHTML = `<button class="nav-link fw-heavy ${name === currentSheet ? 'active bg-primary text-white' : 'text-dark'}" onclick="switchSheet('${name}')">${name}</button>`;
                 sheetTabs.appendChild(li);
             });
 
-            // 新增工作表按鈕
             const addLi = document.createElement("li");
             addLi.className = "nav-item ms-1";
-            addLi.innerHTML = `<button class="btn btn-outline-secondary btn-sm mt-1" onclick="addNewSheetPrompt()"><i class="fa-solid fa-plus"></i></button>`;
+            addLi.innerHTML = `<button class="btn btn-outline-primary btn-sm mt-1 fw-heavy" onclick="addNewSheetPrompt()"><i class="fa-solid fa-plus"></i> 新增分頁</button>`;
             sheetTabs.appendChild(addLi);
 
-            // 「入金管理」專用分頁
             const depositLi = document.createElement("li");
             depositLi.className = "nav-item ms-auto";
-            depositLi.innerHTML = `<button class="nav-link bg-warning text-dark ${currentSheet === 'DEPOSITS_PAGE' ? 'active fw-bold' : ''}" onclick="switchSheet('DEPOSITS_PAGE')"><i class="fa-solid fa-wallet"></i> 入金與剩餘金額管理</button>`;
+            depositLi.innerHTML = `<button class="nav-link fw-heavy ${currentSheet === 'DEPOSITS_PAGE' ? 'active bg-warning text-dark' : 'bg-light text-dark border'}" onclick="switchSheet('DEPOSITS_PAGE')"><i class="fa-solid fa-wallet"></i> 入金與剩餘金額管理</button>`;
             sheetTabs.appendChild(depositLi);
         }
 
@@ -444,19 +460,17 @@
             tbody.innerHTML = "";
 
             if (currentSheet === "DEPOSITS_PAGE") {
-                // 渲染入金頁面
                 thead.innerHTML = `
                     <tr>
-                        <th>日期</th>
-                        <th>入金金額 (NT$)</th>
-                        <th>操作</th>
+                        <th class="fw-heavy">日期</th>
+                        <th class="fw-heavy">入金金額 (NT$)</th>
+                        <th class="fw-heavy" style="width: 100px;">操作</th>
                     </tr>
                 `;
                 
                 let totalDeposit = 0;
                 let totalActualDispatched = 0;
 
-                // 計算各分頁實際總發放金額累計
                 Object.values(allDataCache).forEach(sheet => {
                     Object.values(sheet).forEach(row => {
                         totalActualDispatched += Number(row.實際總價 || 0);
@@ -469,42 +483,40 @@
                     totalDeposit += Number(d.入金金額 || 0);
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td>${d.日期 || ''}</td>
-                        <td>$${Number(d.入金金額 || 0).toLocaleString()}</td>
-                        <td><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteDeposit('${key}')"><i class="fa-solid fa-trash"></i></button></td>
+                        <td class="fw-heavy">${d.日期 || ''}</td>
+                        <td class="fw-heavy text-success">$${Number(d.入金金額 || 0).toLocaleString()}</td>
+                        <td><button class="btn btn-sm btn-outline-danger fw-heavy py-0" onclick="deleteDeposit('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button></td>
                     `;
                     tbody.appendChild(tr);
                 });
 
                 const remainingAmount = totalDeposit - totalActualDispatched;
 
-                // 顯示總計列
                 const summaryTr = document.createElement("tr");
-                summaryTr.className = "table-info fw-bold";
+                summaryTr.className = "table-warning fw-heavy";
                 summaryTr.innerHTML = `
-                    <td>累積入金總額：$${totalDeposit.toLocaleString()}</td>
-                    <td>實際總發放累計：$${totalActualDispatched.toLocaleString()}</td>
-                    <td class="${remainingAmount >= 0 ? 'text-success' : 'text-danger'}">剩餘金額：$${remainingAmount.toLocaleString()}</td>
+                    <td class="fw-heavy">累積入金總額：$${totalDeposit.toLocaleString()}</td>
+                    <td class="fw-heavy">實際總發放累計：$${totalActualDispatched.toLocaleString()}</td>
+                    <td class="fw-heavy ${remainingAmount >= 0 ? 'text-success' : 'text-danger'}">剩餘金額：$${remainingAmount.toLocaleString()}</td>
                 `;
                 tbody.appendChild(summaryTr);
 
             } else {
-                // 渲染一般工作表
                 thead.innerHTML = `
                     <tr>
-                        <th>品號</th>
-                        <th>貨號</th>
-                        <th>工單號碼</th>
-                        <th>數量</th>
-                        <th>後處理工時(H)</th>
-                        <th>單價</th>
-                        <th>作業人員</th>
-                        <th>預計總價</th>
-                        <th>實際完成數</th>
-                        <th>實際總價</th>
-                        <th>完成率</th>
-                        <th>備註</th>
-                        <th>操作</th>
+                        <th class="fw-heavy">品號</th>
+                        <th class="fw-heavy">貨號</th>
+                        <th class="fw-heavy">工單號碼</th>
+                        <th class="fw-heavy">數量</th>
+                        <th class="fw-heavy">後處理工時(H)</th>
+                        <th class="fw-heavy">單價</th>
+                        <th class="fw-heavy">作業人員</th>
+                        <th class="fw-heavy">預計總價</th>
+                        <th class="fw-heavy">實際完成數</th>
+                        <th class="fw-heavy">實際總價</th>
+                        <th class="fw-heavy">完成率</th>
+                        <th class="fw-heavy">備註</th>
+                        <th class="fw-heavy" style="width: 100px;">操作</th>
                     </tr>
                 `;
 
@@ -512,7 +524,7 @@
                 const keys = Object.keys(sheetData);
 
                 if (keys.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-3">此工作表目前無記錄</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-4 fw-heavy">此工作表目前無記錄</td></tr>`;
                     return;
                 }
 
@@ -521,21 +533,21 @@
                     const ratePercent = ((row.完成率 || 0) * 100).toFixed(1) + "%";
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td>${row.品號 || ''}</td>
-                        <td>${row.貨號 || ''}</td>
-                        <td>${row.工單號碼 || ''}</td>
-                        <td>${row.數量 || 0}</td>
-                        <td>${row["後處理工時(H)"] || 0}</td>
-                        <td>$${row.單價 || 0}</td>
-                        <td>${row.作業人員 || ''}</td>
-                        <td>$${row.預計總價 || 0}</td>
-                        <td>${row.實際完成數 || 0}</td>
-                        <td>$${row.實際總價 || 0}</td>
-                        <td><span class="badge bg-info text-dark">${ratePercent}</span></td>
-                        <td>${row.備註 || ''}</td>
+                        <td class="fw-heavy">${row.品號 || ''}</td>
+                        <td class="fw-heavy">${row.貨號 || ''}</td>
+                        <td class="fw-heavy">${row.工單號碼 || ''}</td>
+                        <td class="fw-heavy">${row.數量 || 0}</td>
+                        <td class="fw-heavy">${row["後處理工時(H)"] || 0}</td>
+                        <td class="fw-heavy text-primary">$${row.單價 || 0}</td>
+                        <td class="fw-heavy">${row.作業人員 || ''}</td>
+                        <td class="fw-heavy">$${row.預計總價 || 0}</td>
+                        <td class="fw-heavy">${row.实际完成数 || row.實際完成數 || 0}</td>
+                        <td class="fw-heavy text-success">$${row.實際總價 || 0}</td>
+                        <td><span class="badge bg-info text-dark fw-heavy">${ratePercent}</span></td>
+                        <td class="fw-heavy">${row.備註 || ''}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary py-0 px-1 me-1" onclick="editRow('${key}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteRow('${key}')"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn btn-sm btn-outline-primary fw-heavy py-0 px-1 me-1" onclick="editRow('${key}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-outline-danger fw-heavy py-0 px-1" onclick="deleteRow('${key}')"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -565,7 +577,6 @@
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
 
-        // 新增 / 編輯表單
         const workForm = document.getElementById("workForm");
         workForm.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -634,40 +645,33 @@
             if (confirm("確定刪除此入金記錄？")) remove(ref(db, `deposits/${key}`));
         }
 
-        // ================= 6 張分析圖表產生邏輯 =================
+        // 6張圖表產生邏輯
         function renderAllCharts() {
             const sheetData = currentSheet !== "DEPOSITS_PAGE" ? (allDataCache[currentSheet] || {}) : {};
-            const rows = Object.values(sheetData);
-
-            // 收集全域資料用於跨分頁圖表
             let allRows = [];
             Object.values(allDataCache).forEach(s => allRows.push(...Object.values(s)));
 
-            // 1. 累積完成品號數量 (Bar)
             const itemCounts = {};
-            rows.forEach(r => {
+            allRows.forEach(r => {
                 const item = r.品號 || "未知品號";
                 itemCounts[item] = (itemCounts[item] || 0) + Number(r.實際完成數 || 0);
             });
             createOrUpdateChart('chart1', 'bar', Object.keys(itemCounts), Object.values(itemCounts), '完成數量');
 
-            // 2. 累計實際發放金額 (Bar)
             const itemPrices = {};
-            rows.forEach(r => {
+            allRows.forEach(r => {
                 const item = r.品號 || "未知品號";
                 itemPrices[item] = (itemPrices[item] || 0) + Number(r.實際總價 || 0);
             });
             createOrUpdateChart('chart2', 'bar', Object.keys(itemPrices), Object.values(itemPrices), '金額 (NT$)');
 
-            // 3. 作業人員累積發放金額 (Doughnut 或 Bar)
             const opPrices = {};
-            rows.forEach(r => {
+            allRows.forEach(r => {
                 const op = r.作業人員 || "未指派";
                 opPrices[op] = (opPrices[op] || 0) + Number(r.實際總價 || 0);
             });
             createOrUpdateChart('chart3', 'doughnut', Object.keys(opPrices), Object.values(opPrices), '發放金額');
 
-            // 4. 累積實際總發放金額 (跨分頁比較 Bar)
             const sheetNames = Object.keys(allDataCache);
             const sheetTotals = sheetNames.map(name => {
                 let sum = 0;
@@ -676,7 +680,6 @@
             });
             createOrUpdateChart('chart4', 'bar', sheetNames, sheetTotals, '各分頁實際總發放');
 
-            // 5. 各分頁完成率統計 (Line)
             const sheetRates = sheetNames.map(name => {
                 let totalQ = 0, totalA = 0;
                 Object.values(allDataCache[name]).forEach(r => {
@@ -687,9 +690,8 @@
             });
             createOrUpdateChart('chart5', 'line', sheetNames, sheetRates, '平均完成率 (%)', 100);
 
-            // 6. 累計工時 (公式: 後處理工時 * 實際完成數)
             const opHours = {};
-            rows.forEach(r => {
+            allRows.forEach(r => {
                 const op = r.作業人員 || "未指派";
                 const h = Number(r["後處理工時(H)"] || 0);
                 const act = Number(r["實際完成數"] || 0);
@@ -702,12 +704,6 @@
             const ctx = document.getElementById(canvasId).getContext('2d');
             if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
 
-            const options = {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: type !== 'doughnut' ? { y: { beginAtZero: true, ...(maxY ? { max: maxY } : {}) } } : {}
-            };
-
             chartInstances[canvasId] = new Chart(ctx, {
                 type: type,
                 data: {
@@ -715,11 +711,15 @@
                     datasets: [{
                         label: labelName,
                         data: data,
-                        backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(231, 76, 60, 0.7)', 'rgba(155, 89, 182, 0.7)', 'rgba(52, 152, 219, 0.7)'],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
                         borderWidth: 1
                     }]
                 },
-                options: options
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: type !== 'doughnut' ? { y: { beginAtZero: true, ...(maxY ? { max: maxY } : {}) } } : {}
+                }
             });
         }
 
@@ -736,7 +736,6 @@
             });
         });
 
-        // 匯出 Excel
         document.getElementById('exportExcelBtn').addEventListener('click', () => {
             const wb = XLSX.utils.book_new();
             Object.keys(allDataCache).forEach(sheetName => {
@@ -748,14 +747,11 @@
                 }));
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dataArray), sheetName);
             });
-            // 順便把入金記錄也包進 Excel
             const depArray = Object.values(depositsCache).map(d => ({ "日期": d.日期, "入金金額": d.入金金額 }));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(depArray), "入金記錄");
-
             XLSX.writeFile(wb, "後處理論件計酬完整統計報表.xlsx");
         });
 
-        // 匯入 Excel
         document.getElementById('excelFileinput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
