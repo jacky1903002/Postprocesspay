@@ -57,15 +57,15 @@
         <!-- 頂部導覽列 / 狀態列 -->
         <div class="row align-items-center mb-3 bg-white p-3 rounded shadow-sm mx-0 border-start border-4 border-primary">
             <div class="col-md-4">
-                <h4 class="mb-0 text-primary fw-heavy"><i class="fa-solid fa-chart-line"></i> 後處理論件計酬統計系統[cite: 3]</h4>
+                <h4 class="mb-0 text-primary fw-heavy"><i class="fa-solid fa-chart-line"></i> 後處理論件計酬統計系統</h4>
             </div>
             <div class="col-md-4 text-center">
-                <span id="connectionStatus" class="badge bg-success p-2 me-2 fw-heavy">檢查連線中...[cite: 3]</span>
-                <span id="lastSaveTime" class="text-dark small fw-heavy">上次儲存：無[cite: 3]</span>
+                <span id="connectionStatus" class="badge bg-success p-2 me-2 fw-heavy">檢查連線中...</span>
+                <span id="lastSaveTime" class="text-dark small fw-heavy">上次儲存：無</span>
             </div>
             <div class="col-md-4 text-end">
-                <span id="userDisplayEmail" class="me-3 text-dark small fw-heavy">[cite: 3]</span>
-                <button id="logoutBtn" class="btn btn-outline-danger btn-sm fw-heavy"><i class="fa-solid fa-right-from-bracket"></i> 登出[cite: 3]</button>
+                <span id="userDisplayEmail" class="me-3 text-dark small fw-heavy"></span>
+                <button id="logoutBtn" class="btn btn-outline-danger btn-sm fw-heavy"><i class="fa-solid fa-right-from-bracket"></i> 登出</button>
             </div>
         </div>
 
@@ -77,24 +77,24 @@
                     <div class="col-4">
                         <div class="card bg-white text-primary dashboard-card border border-primary">
                             <div class="card-body p-2">
-                                <h6 class="card-title text-muted">累積完成產品總数[cite: 3]</h6>
-                                <h3 id="totalCompletedCount" class="fw-heavy mb-0 text-dark">0[cite: 3]</h3>
+                                <h6 class="card-title text-muted">累積完成產品總數</h6>
+                                <h3 id="totalCompletedCount" class="fw-heavy mb-0 text-dark">0</h3>
                             </div>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="card bg-white text-success dashboard-card border border-success">
                             <div class="card-body p-2">
-                                <h6 class="card-title text-muted">實際總發放金額[cite: 3]</h6>
-                                <h3 id="totalActualPrice" class="fw-heavy mb-0 text-success">$0[cite: 3]</h3>
+                                <h6 class="card-title text-muted">實際總發放金額</h6>
+                                <h3 id="totalActualPrice" class="fw-heavy mb-0 text-success">$0</h3>
                             </div>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="card bg-white text-info dashboard-card border border-info">
                             <div class="card-body p-2">
-                                <h6 class="card-title text-muted">預計總金額[cite: 3]</h6>
-                                <h3 id="totalEstimatedPrice" class="fw-heavy mb-0 text-info">$0[cite: 3]</h3>
+                                <h6 class="card-title text-muted">預計總金額</h6>
+                                <h3 id="totalEstimatedPrice" class="fw-heavy mb-0 text-info">$0</h3>
                             </div>
                         </div>
                     </div>
@@ -104,17 +104,17 @@
             <div class="col-xl-6 col-lg-5 text-end ms-auto">
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
                     <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" id="openChartsModalBtn">
-                        <i class="fa-solid fa-chart-pie"></i> 後處理論件計酬分析[cite: 3]
+                        <i class="fa-solid fa-chart-pie"></i> 後處理論件計酬分析
                     </button>
                     <button class="btn btn-success btn-sm fw-heavy px-3 shadow-sm" id="addNewRowBtn" onclick="addNewRow()">
-                        <i class="fa-solid fa-plus"></i> 新增一列[cite: 3]
+                        <i class="fa-solid fa-plus"></i> 新增一列
                     </button>
                     <label class="btn btn-warning btn-sm fw-heavy px-3 text-dark shadow-sm mb-0" style="cursor: pointer;">
-                        <i class="fa-solid fa-file-excel"></i> 匯入 Excel[cite: 3]
+                        <i class="fa-solid fa-file-excel"></i> 匯入 Excel
                         <input type="file" id="excelFileinput" accept=".xlsx, .xls" class="d-none">
                     </label>
                     <button class="btn btn-secondary btn-sm fw-heavy px-3 shadow-sm" id="exportExcelBtn">
-                        <i class="fa-solid fa-file-arrow-down"></i> 匯出 Excel[cite: 3]
+                        <i class="fa-solid fa-file-arrow-down"></i> 匯出 Excel
                     </button>
                 </div>
             </div>
@@ -127,7 +127,7 @@
             </ul>
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-primary btn-sm fw-heavy shadow-sm" onclick="addNewSheetPrompt()">
-                    <i class="fa-solid fa-plus"></i> 新增分頁[cite: 3]
+                    <i class="fa-solid fa-plus"></i> 新增分頁
                 </button>
                 <div id="sheetDeleteContainer">
                     <!-- 動態刪除目前分頁按鈕 -->
@@ -151,7 +151,7 @@
                 <!-- 左下角簽收欄位 -->
                 <div class="d-flex justify-content-start align-items-center pt-2 border-top">
                     <div class="fw-heavy text-dark fs-6 ps-2">
-                        簽收人：<span style="display: inline-block; border-bottom: 2px solid #333; width: 180px; text-align: center;">&nbsp;</span>[cite: 3]
+                        簽收人：<span style="display: inline-block; border-bottom: 2px solid #333; width: 180px; text-align: center;">&nbsp;</span>
                     </div>
                 </div>
             </div>
@@ -163,7 +163,7 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable" style="max-width: 95vw;">
             <div class="modal-content shadow-lg">
                 <div class="modal-header bg-dark text-white py-2">
-                    <h5 class="modal-title fw-heavy"><i class="fa-solid fa-chart-column"></i> 後處理論件計酬 - 6 張商業分析圖表[cite: 3]</h5>
+                    <h5 class="modal-title fw-heavy"><i class="fa-solid fa-chart-column"></i> 後處理論件計酬 - 6 張商業分析圖表</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-3">
@@ -171,8 +171,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">1. 累積完成品號數量[cite: 3]</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart1', '累積完成品號數量.png')"><i class="fa-solid fa-download"></i>[cite: 3]</button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">1. 累積完成品號數量</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart1', '累積完成品號數量.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart1" height="210"></canvas></div>
                             </div>
@@ -180,8 +180,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">2. 累計實際發放金額[cite: 3]</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart2', '累計實際發放金額.png')"><i class="fa-solid fa-download"></i>[cite: 3]</button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">2. 累計實際發放金額</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart2', '累計實際發放金額.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart2" height="210"></canvas></div>
                             </div>
@@ -189,8 +189,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">3. 作業人員累積發放金額[cite: 3]</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart3', '作業人員累積發放金額.png')"><i class="fa-solid fa-download"></i>[cite: 3]</button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">3. 作業人員累積發放金額</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart3', '作業人員累積發放金額.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart3" height="210"></canvas></div>
                             </div>
@@ -198,8 +198,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">4. 累積實際發放金額[cite: 3]</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart4', '累積實際發放金額.png')"><i class="fa-solid fa-download"></i>[cite: 3]</button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">4. 累積實際發放金額</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart4', '累積實際發放金額.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart4" height="210"></canvas></div>
                             </div>
@@ -207,8 +207,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">5. 各週累積完成數量[cite: 3]</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart5', '各週累積完成數量.png')"><i class="fa-solid fa-download"></i>[cite: 3]</button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">5. 各週累積完成數量</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart5', '各週累積完成數量.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart5" height="210"></canvas></div>
                             </div>
@@ -216,8 +216,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">6. 累計工時 (工時×實際完成數)[cite: 3]</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart6', '累計工時統計.png')"><i class="fa-solid fa-download"></i>[cite: 3]</button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">6. 累計工時 (工時×實際完成數)</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart6', '累計工時統計.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart6" height="210"></canvas></div>
                             </div>
@@ -226,9 +226,9 @@
                 </div>
                 <div class="modal-footer bg-white justify-content-between py-2">
                     <button class="btn btn-dark fw-heavy px-4" id="exportAllChartsBtn">
-                        <i class="fa-solid fa-file-image"></i> 一鍵匯出所有 6 張圖表 (PNG)[cite: 3]
+                        <i class="fa-solid fa-file-image"></i> 一鍵匯出所有 6 張圖表 (PNG)
                     </button>
-                    <button type="button" class="btn btn-secondary fw-heavy px-4" data-bs-dismiss="modal">關閉視窗[cite: 3]</button>
+                    <button type="button" class="btn btn-secondary fw-heavy px-4" data-bs-dismiss="modal">關閉視窗</button>
                 </div>
             </div>
         </div>
@@ -385,7 +385,7 @@
                 if (sheetNames.length > 1) {
                     deleteContainer.innerHTML = `
                         <button class="btn btn-outline-danger btn-sm fw-heavy shadow-sm" onclick="deleteCurrentSheet()">
-                            <i class="fa-solid fa-trash-can"></i> 刪除分頁 (${currentSheet})[cite: 3]
+                            <i class="fa-solid fa-trash-can"></i> 刪除分頁 (${currentSheet})
                         </button>
                     `;
                 }
@@ -514,9 +514,9 @@
             if (currentSheet === "DEPOSITS_PAGE") {
                 thead.innerHTML = `
                     <tr>
-                        <th class="fw-heavy">日期[cite: 3]</th>
-                        <th class="fw-heavy">入金金額 (NT$)[cite: 3]</th>
-                        <th class="fw-heavy" style="width: 100px;">操作[cite: 3]</th>
+                        <th class="fw-heavy">日期</th>
+                        <th class="fw-heavy">入金金額 (NT$)</th>
+                        <th class="fw-heavy" style="width: 100px;">操作</th>
                     </tr>
                 `;
                 
@@ -535,9 +535,9 @@
                     totalDeposit += Number(d.入金金額 || 0);
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '日期')">${d.日期 || ''}[cite: 3]</td>
-                        <td class="editable-cell text-success" ondblclick="makeEditable(this, '${key}', '入金金額', 'number')">$${Number(d.入金金額 || 0).toLocaleString()}[cite: 3]</td>
-                        <td><button class="btn btn-sm btn-outline-danger fw-heavy py-0" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除[cite: 3]</button></td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '日期')">${d.日期 || ''}</td>
+                        <td class="editable-cell text-success" ondblclick="makeEditable(this, '${key}', '入金金額', 'number')">$${Number(d.入金金額 || 0).toLocaleString()}</td>
+                        <td><button class="btn btn-sm btn-outline-danger fw-heavy py-0" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button></td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -547,28 +547,28 @@
                 const summaryTr = document.createElement("tr");
                 summaryTr.className = "table-warning fw-heavy";
                 summaryTr.innerHTML = `
-                    <td class="fw-heavy">累積入金總額：$${totalDeposit.toLocaleString()}[cite: 3]</td>
-                    <td class="fw-heavy">實際總發放累計：$${totalActualDispatched.toLocaleString()}[cite: 3]</td>
-                    <td class="fw-heavy ${remainingAmount >= 0 ? 'text-success' : 'text-danger'}">剩餘金額：$${remainingAmount.toLocaleString()}[cite: 3]</td>
+                    <td class="fw-heavy">累積入金總額：$${totalDeposit.toLocaleString()}</td>
+                    <td class="fw-heavy">實際總發放累計：$${totalActualDispatched.toLocaleString()}</td>
+                    <td class="fw-heavy ${remainingAmount >= 0 ? 'text-success' : 'text-danger'}">剩餘金額：$${remainingAmount.toLocaleString()}</td>
                 `;
                 tbody.appendChild(summaryTr);
 
             } else {
                 thead.innerHTML = `
                     <tr>
-                        <th class="fw-heavy">品號[cite: 3]</th>
-                        <th class="fw-heavy">貨號[cite: 3]</th>
-                        <th class="fw-heavy">工單號碼[cite: 3]</th>
-                        <th class="fw-heavy">數量[cite: 3]</th>
-                        <th class="fw-heavy">後處理工時(H)[cite: 3]</th>
-                        <th class="fw-heavy bg-light text-secondary">單價 (公式)[cite: 3]</th>
-                        <th class="fw-heavy">作業人員[cite: 3]</th>
-                        <th class="fw-heavy bg-light text-secondary">預計總價 (公式)[cite: 3]</th>
-                        <th class="fw-heavy">實際完成數[cite: 3]</th>
-                        <th class="fw-heavy bg-light text-secondary">實際總價 (公式)[cite: 3]</th>
-                        <th class="fw-heavy bg-light text-secondary">完成率 (公式)[cite: 3]</th>
-                        <th class="fw-heavy">備註[cite: 3]</th>
-                        <th class="fw-heavy" style="width: 100px;">操作[cite: 3]</th>
+                        <th class="fw-heavy">品號</th>
+                        <th class="fw-heavy">貨號</th>
+                        <th class="fw-heavy">工單號碼</th>
+                        <th class="fw-heavy">數量</th>
+                        <th class="fw-heavy">後處理工時(H)</th>
+                        <th class="fw-heavy bg-light text-secondary">單價 (公式)</th>
+                        <th class="fw-heavy">作業人員</th>
+                        <th class="fw-heavy bg-light text-secondary">預計總價 (公式)</th>
+                        <th class="fw-heavy">實際完成數</th>
+                        <th class="fw-heavy bg-light text-secondary">實際總價 (公式)</th>
+                        <th class="fw-heavy bg-light text-secondary">完成率 (公式)</th>
+                        <th class="fw-heavy">備註</th>
+                        <th class="fw-heavy" style="width: 100px;">操作</th>
                     </tr>
                 `;
 
@@ -576,7 +576,7 @@
                 const keys = Object.keys(sheetData);
 
                 if (keys.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-4 fw-heavy">此工作表目前無記錄，請點擊上方「新增一列」按鈕[cite: 3]</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-4 fw-heavy">此工作表目前無記錄，請點擊上方「新增一列」按鈕</td></tr>`;
                     return;
                 }
 
@@ -585,20 +585,20 @@
                     const ratePercent = ((row.完成率 || 0) * 100).toFixed(1) + "%";
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '品號')">${row.品號 || ''}[cite: 3]</td>
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '貨號')">${row.貨號 || ''}[cite: 3]</td>
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '工單號碼')">${row.工單號碼 || ''}[cite: 3]</td>
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '數量', 'number')">${row.數量 || 0}[cite: 3]</td>
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '後處理工時(H)', 'number')">${row["後處理工時(H)"] || 0}[cite: 3]</td>
-                        <td class="bg-light fw-bold text-primary">$${row.單價 || 0}[cite: 3]</td>
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '作業人員')">${row.作業人員 || ''}[cite: 3]</td>
-                        <td class="bg-light fw-bold">$${row.預計總價 || 0}[cite: 3]</td>
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '實際完成數', 'number')">${row.實際完成數 || 0}[cite: 3]</td>
-                        <td class="bg-light fw-bold text-success">$${row.實際總價 || 0}[cite: 3]</td>
-                        <td class="bg-light"><span class="badge bg-info text-dark fw-heavy">${ratePercent}[cite: 3]</span></td>
-                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '備註')">${row.備註 || ''}[cite: 3]</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '品號')">${row.品號 || ''}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '貨號')">${row.貨號 || ''}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '工單號碼')">${row.工單號碼 || ''}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '數量', 'number')">${row.數量 || 0}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '後處理工時(H)', 'number')">${row["後處理工時(H)"] || 0}</td>
+                        <td class="bg-light fw-bold text-primary">$${row.單價 || 0}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '作業人員')">${row.作業人員 || ''}</td>
+                        <td class="bg-light fw-bold">$${row.預計總價 || 0}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '實際完成數', 'number')">${row.實際完成數 || 0}</td>
+                        <td class="bg-light fw-bold text-success">$${row.實際總價 || 0}</td>
+                        <td class="bg-light"><span class="badge bg-info text-dark fw-heavy">${ratePercent}</span></td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '備註')">${row.備註 || ''}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger fw-heavy py-0 px-2" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除[cite: 3]</button>
+                            <button class="btn btn-sm btn-outline-danger fw-heavy py-0 px-2" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -681,7 +681,6 @@
             });
             createOrUpdateChart('chart4', 'line', sheetNames, sheetCumulativeTotals, '累積實際發放金額 (NT$)');
 
-            // 5. 各週累積完成數量 (Line 折線圖 - 累加各分頁實際完成數)
             let cumulativeCompleted = 0;
             const sheetCumulativeCompleted = sheetNames.map(name => {
                 let sumComp = 0;
@@ -834,4 +833,3 @@
     </script>
 </body>
 </html>
-```[cite: 3]
