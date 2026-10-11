@@ -101,8 +101,7 @@
             <!-- 右上角功能按鈕群 -->
             <div class="col-xl-6 col-lg-5 text-end ms-auto">
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
-                    <!-- 使用標準 Bootstrap 5 彈窗觸發 -->
-                    <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#chartsModal">
+                    <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" id="openChartsModalBtn">
                         <i class="fa-solid fa-chart-pie"></i> 生成 6 張分析圖表
                     </button>
                     <button class="btn btn-success btn-sm fw-heavy px-3 shadow-sm" id="addNewRowBtn" onclick="addNewRow()">
@@ -119,10 +118,15 @@
             </div>
         </div>
 
-        <!-- 工作表標籤列 -->
-        <ul class="nav nav-tabs mb-2 fw-heavy" id="sheetTabs">
-            <!-- 動態產生 -->
-        </ul>
+        <!-- 工作表標籤列與分頁刪除按鈕 -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <ul class="nav nav-tabs fw-heavy mb-0" id="sheetTabs" style="border-bottom: none;">
+                <!-- 動態產生 -->
+            </ul>
+            <div id="sheetDeleteContainer">
+                <!-- 動態刪除目前分頁按鈕 -->
+            </div>
+        </div>
 
         <!-- 全螢幕滿版資料表格區域 (附帶右下角簽收欄位) -->
         <div class="card shadow-sm border-0 mb-4 w-100 bg-white">
@@ -223,6 +227,9 @@
         </div>
     </div>
 
+    <!-- Bootstrap 5 JS Bundle (確保 Modal 互動正常) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <!-- Firebase SDK 10 Modular 與商業邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -256,6 +263,18 @@
         let allDataCache = {};
         let depositsCache = {};
         let chartInstances = {};
+        let chartsModalObj = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            chartsModalObj = new bootstrap.Modal(document.getElementById('chartsModal'));
+        });
+
+        document.getElementById('openChartsModalBtn').addEventListener('click', () => {
+            if (chartsModalObj) {
+                chartsModalObj.show();
+                renderAllCharts();
+            }
+        });
 
         onValue(ref(db, ".info/connected"), (snap) => {
             if (snap.val() === true) {
@@ -338,24 +357,38 @@
 
         function renderTabs() {
             const sheetTabs = document.getElementById("sheetTabs");
+            const deleteContainer = document.getElementById("sheetDeleteContainer");
             sheetTabs.innerHTML = "";
+            deleteContainer.innerHTML = "";
             
             Object.keys(allDataCache).forEach(name => {
                 const li = document.createElement("li");
-                li.className = "nav-item";
-                li.innerHTML = `<button class="nav-link fw-heavy ${name === currentSheet ? 'active bg-primary text-white' : 'text-dark'}" onclick="switchSheet('${name}')">${name}</button>`;
+                li.className = "nav-item me-1";
+                li.innerHTML = `<button class="nav-link fw-heavy rounded ${name === currentSheet ? 'active bg-primary text-white' : 'bg-light text-dark border'}" onclick="switchSheet('${name}')">${name}</button>`;
                 sheetTabs.appendChild(li);
             });
 
             const addLi = document.createElement("li");
             addLi.className = "nav-item ms-1";
-            addLi.innerHTML = `<button class="btn btn-outline-primary btn-sm mt-1 fw-heavy" onclick="addNewSheetPrompt()"><i class="fa-solid fa-plus"></i> 新增分頁</button>`;
+            addLi.innerHTML = `<button class="btn btn-outline-primary btn-sm fw-heavy" onclick="addNewSheetPrompt()"><i class="fa-solid fa-plus"></i> 新增分頁</button>`;
             sheetTabs.appendChild(addLi);
 
             const depositLi = document.createElement("li");
-            depositLi.className = "nav-item ms-auto";
-            depositLi.innerHTML = `<button class="nav-link fw-heavy ${currentSheet === 'DEPOSITS_PAGE' ? 'active bg-warning text-dark' : 'bg-light text-dark border'}" onclick="switchSheet('DEPOSITS_PAGE')"><i class="fa-solid fa-wallet"></i> 入金與剩餘金額管理</button>`;
+            depositLi.className = "nav-item ms-3";
+            depositLi.innerHTML = `<button class="nav-link fw-heavy rounded ${currentSheet === 'DEPOSITS_PAGE' ? 'active bg-warning text-dark' : 'bg-light text-dark border'}" onclick="switchSheet('DEPOSITS_PAGE')"><i class="fa-solid fa-wallet"></i> 入金與剩餘金額管理</button>`;
             sheetTabs.appendChild(depositLi);
+
+            // 若目前在一般分頁且分頁數大於 1，或者隨便一般分頁，提供刪除目前工作表按鈕
+            if (currentSheet !== "DEPOSITS_PAGE") {
+                const sheetNames = Object.keys(allDataCache);
+                if (sheetNames.length > 1) {
+                    deleteContainer.innerHTML = `
+                        <button class="btn btn-outline-danger btn-sm fw-heavy" onclick="deleteCurrentSheet()">
+                            <i class="fa-solid fa-trash-can"></i> 刪除目前分頁 (${currentSheet})
+                        </button>
+                    `;
+                }
+            }
         }
 
         window.switchSheet = function(name) {
@@ -370,6 +403,23 @@
                 set(ref(db, "sheets"), allDataCache);
                 currentSheet = name;
                 renderApp();
+            } else if (name) {
+                alert("此分頁名稱已存在！");
+            }
+        }
+
+        window.deleteCurrentSheet = function() {
+            const sheetNames = Object.keys(allDataCache);
+            if (sheetNames.length <= 1) {
+                alert("至少需要保留一個工作表，無法刪除！");
+                return;
+            }
+            if (confirm(`確定要刪除工作表「${currentSheet}」以及其所有記錄嗎？`)) {
+                delete allDataCache[currentSheet];
+                set(ref(db, "sheets"), allDataCache).then(() => {
+                    currentSheet = Object.keys(allDataCache)[0];
+                    renderApp();
+                });
             }
         }
 
@@ -380,6 +430,7 @@
                 set(ref(db, "deposits"), depositsCache).then(() => renderApp());
             } else {
                 const newRowKey = 'row_' + Date.now();
+                if (!allDataCache[currentSheet]) allDataCache[currentSheet] = {};
                 allDataCache[currentSheet][newRowKey] = {
                     "品號": "新品號", "貨號": "新貨號", "工單號碼": "新工單",
                     "數量": 0, "後處理工時(H)": 0, "單價": 0, "作業人員": "未指派",
@@ -576,12 +627,6 @@
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
 
-        // 監聽 Bootstrap Modal 打開事件，自動渲染 6 張圖表
-        const chartsModalEl = document.getElementById('chartsModal');
-        chartsModalEl.addEventListener('shown.bs.modal', event => {
-            renderAllCharts();
-        });
-
         function renderAllCharts() {
             let allRows = [];
             Object.values(allDataCache).forEach(s => allRows.push(...Object.values(s)));
@@ -665,7 +710,7 @@
             link.click();
         }
 
-        // 修正：一鍵依序匯出 6 張分析圖表 (加入防呆與錯開下載請求)
+        // 一鍵依序匯出 6 張分析圖表
         document.getElementById('exportAllChartsBtn').addEventListener('click', () => {
             const chartIds = ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'];
             chartIds.forEach((id, idx) => {
@@ -761,4 +806,3 @@
     </script>
 </body>
 </html>
-```[cite: 1]
