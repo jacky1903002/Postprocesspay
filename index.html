@@ -99,10 +99,11 @@
                     </div>
                 </div>
             </div>
-            <!-- 右上角功能按鈕群 (移至此處) -->
+            <!-- 右上角功能按鈕群 -->
             <div class="col-xl-6 col-lg-5 text-end ms-auto">
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
-                    <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" id="openChartsModalBtn">
+                    <!-- 使用標準 Bootstrap 5 data-bs-toggle 確保百分之百觸發 -->
+                    <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#chartsModal">
                         <i class="fa-solid fa-chart-pie"></i> 生成 6 張分析圖表 (全螢幕)
                     </button>
                     <button class="btn btn-success btn-sm fw-heavy px-3 shadow-sm" id="addNewRowBtn" onclick="addNewRow()">
@@ -576,12 +577,10 @@
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
 
-        // 綁定圖表彈窗按鈕
-        document.getElementById("openChartsModalBtn").addEventListener("click", () => {
+        // 監聽 Bootstrap Modal 打開事件，自動渲染 6 張圖表
+        const chartsModalEl = document.getElementById('chartsModal');
+        chartsModalEl.addEventListener('shown.bs.modal', event => {
             renderAllCharts();
-            const modalElement = document.getElementById("chartsModal");
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
         });
 
         function renderAllCharts() {
