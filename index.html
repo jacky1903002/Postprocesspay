@@ -744,7 +744,6 @@
             });
         }
 
-        // 轉換圖表為白底 PNG 並下載
         window.exportChartAsPNG = function(canvasId, filename) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
@@ -756,7 +755,6 @@
                 tempCanvas.height = canvas.height;
                 const tCtx = tempCanvas.getContext('2d');
 
-                // 填上不透明白色背景
                 tCtx.fillStyle = '#ffffff';
                 tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
                 tCtx.drawImage(canvas, 0, 0);
@@ -768,7 +766,6 @@
             }, 200);
         }
 
-        // 逐一匯出 6 張圖表
         document.getElementById('exportAllChartsBtn').addEventListener('click', () => {
             const chartIds = ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'];
             chartIds.forEach((id, idx) => {
@@ -786,11 +783,9 @@
             });
         });
 
-        // 一鍵匯出 6 合 1 總覽圖
         document.getElementById('exportCombinedChartBtn').addEventListener('click', () => {
             const chartIds = ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'];
             
-            // 確保所有圖表最新狀態已繪製
             chartIds.forEach(id => {
                 if (chartInstances[id]) chartInstances[id].update();
             });
@@ -808,15 +803,13 @@
                 combinedCanvas.height = rows * imgHeight + (rows + 1) * padding + headerHeight;
                 const cCtx = combinedCanvas.getContext('2d');
 
-                // 背景填白
                 cCtx.fillStyle = '#ffffff';
                 cCtx.fillRect(0, 0, combinedCanvas.width, combinedCanvas.height);
 
-                // 繪製大標題
                 cCtx.fillStyle = '#111827';
                 cCtx.font = 'bold 28px "Microsoft JhengHei", Arial';
                 cCtx.textAlign = 'center';
-                cCtx.fillText('後處理論件計酬 - 商業分析圖表總覽', combinedCanvas.width / 2, 50);
+                cCtx.fillText('後處理論件計酬分析總覽', combinedCanvas.width / 2, 50);
 
                 let loadedCount = 0;
                 chartIds.forEach((id, index) => {
@@ -836,7 +829,6 @@
                         const x = padding + col * (imgWidth + padding);
                         const y = headerHeight + padding + row * (imgHeight + padding);
 
-                        // 繪製圖表卡片外框與陰影背景
                         cCtx.save();
                         cCtx.fillStyle = '#f9fafb';
                         cCtx.strokeStyle = '#e5e7eb';
@@ -847,14 +839,13 @@
                         cCtx.stroke();
                         cCtx.restore();
 
-                        // 繪製圖表圖片
                         cCtx.drawImage(img, x + 15, y + 15, imgWidth - 30, imgHeight - 30);
 
                         loadedCount++;
                         if (loadedCount === chartIds.length) {
                             const link = document.createElement('a');
                             link.href = combinedCanvas.toDataURL('image/png');
-                            link.download = '後處理論件計酬_6合1分析總覽圖.png';
+                            link.download = '後處理論件計酬分析總覽.png';
                             link.click();
                         }
                     };
