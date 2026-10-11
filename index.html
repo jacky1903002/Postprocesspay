@@ -120,13 +120,18 @@
             </div>
         </div>
 
-        <!-- 工作表標籤列與分頁刪除按鈕 -->
-        <div class="d-flex align-items-center justify-content-between mb-2">
+        <!-- 工作表標籤列與分頁管理 (新增/刪除) -->
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
             <ul class="nav nav-tabs fw-heavy mb-0" id="sheetTabs" style="border-bottom: none;">
                 <!-- 動態產生 -->
             </ul>
-            <div id="sheetDeleteContainer">
-                <!-- 動態刪除目前分頁按鈕 -->
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm fw-heavy shadow-sm" onclick="addNewSheetPrompt()">
+                    <i class="fa-solid fa-plus"></i> 新增分頁
+                </button>
+                <div id="sheetDeleteContainer">
+                    <!-- 動態刪除目前分頁按鈕 -->
+                </div>
             </div>
         </div>
 
@@ -370,13 +375,8 @@
                 sheetTabs.appendChild(li);
             });
 
-            const addLi = document.createElement("li");
-            addLi.className = "nav-item ms-1";
-            addLi.innerHTML = `<button class="btn btn-outline-primary btn-sm fw-heavy" onclick="addNewSheetPrompt()"><i class="fa-solid fa-plus"></i> 新增分頁</button>`;
-            sheetTabs.appendChild(addLi);
-
             const depositLi = document.createElement("li");
-            depositLi.className = "nav-item ms-3";
+            depositLi.className = "nav-item ms-2";
             depositLi.innerHTML = `<button class="nav-link fw-heavy rounded ${currentSheet === 'DEPOSITS_PAGE' ? 'active bg-warning text-dark' : 'bg-light text-dark border'}" onclick="switchSheet('DEPOSITS_PAGE')"><i class="fa-solid fa-wallet"></i> 入金與剩餘金額管理</button>`;
             sheetTabs.appendChild(depositLi);
 
@@ -384,8 +384,8 @@
                 const sheetNames = Object.keys(allDataCache);
                 if (sheetNames.length > 1) {
                     deleteContainer.innerHTML = `
-                        <button class="btn btn-outline-danger btn-sm fw-heavy" onclick="deleteCurrentSheet()">
-                            <i class="fa-solid fa-trash-can"></i> 刪除目前分頁 (${currentSheet})
+                        <button class="btn btn-outline-danger btn-sm fw-heavy shadow-sm" onclick="deleteCurrentSheet()">
+                            <i class="fa-solid fa-trash-can"></i> 刪除分頁 (${currentSheet})
                         </button>
                     `;
                 }
@@ -399,13 +399,14 @@
 
         window.addNewSheetPrompt = function() {
             const name = prompt("請輸入新工作表名稱 (例如: W2):");
-            if (name && !allDataCache[name]) {
+            if (name && !allDataCache[name] && name !== "DEPOSITS_PAGE") {
                 allDataCache[name] = {};
-                set(ref(db, "sheets"), allDataCache);
-                currentSheet = name;
-                renderApp();
+                set(ref(db, "sheets"), allDataCache).then(() => {
+                    currentSheet = name;
+                    renderApp();
+                });
             } else if (name) {
-                alert("此分頁名稱已存在！");
+                alert("此分頁名稱已存在或不合法！");
             }
         }
 
@@ -628,7 +629,6 @@
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
 
-        // 輔助函式：將物件資料根據數值大小進行由大到小 (降冪) 排序
         function sortObjDescending(obj) {
             const sortedEntries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
             const sortedKeys = sortedEntries.map(item => item[0]);
@@ -640,7 +640,6 @@
             let allRows = [];
             Object.values(allDataCache).forEach(s => allRows.push(...Object.values(s)));
 
-            // 1. 累積完成品號數量 (Bar - 由大到小排序)
             const itemCounts = {};
             allRows.forEach(r => {
                 const item = r.品號 || "未知品號";
@@ -649,7 +648,6 @@
             const sortedItemCounts = sortObjDescending(itemCounts);
             createOrUpdateChart('chart1', 'bar', sortedItemCounts.keys, sortedItemCounts.values, '完成數量');
 
-            // 2. 累計實際發放金額 (Bar - 由大到小排序)
             const itemPrices = {};
             allRows.forEach(r => {
                 const item = r.品號 || "未知品號";
@@ -658,7 +656,6 @@
             const sortedItemPrices = sortObjDescending(itemPrices);
             createOrUpdateChart('chart2', 'bar', sortedItemPrices.keys, sortedItemPrices.values, '金額 (NT$)');
 
-            // 3. 作業人員累積發放金額 (Doughnut + 啟用 DataLabels 金額標籤)
             const opPrices = {};
             allRows.forEach(r => {
                 const op = r.作業人員 || "未指派";
@@ -674,7 +671,6 @@
                 }
             }, [ChartDataLabels]);
 
-            // 4. 累積實際發放金額 (Line 折線圖 - 累加各分頁金額)
             const sheetNames = Object.keys(allDataCache);
             let cumulativeSum = 0;
             const sheetCumulativeTotals = sheetNames.map(name => {
@@ -685,7 +681,6 @@
             });
             createOrUpdateChart('chart4', 'line', sheetNames, sheetCumulativeTotals, '累積實際發放金額 (NT$)');
 
-            // 5. 各週完成率統計 (Line 折線圖)
             const sheetRates = sheetNames.map(name => {
                 let totalQ = 0, totalA = 0;
                 Object.values(allDataCache[name]).forEach(r => {
@@ -696,7 +691,6 @@
             });
             createOrUpdateChart('chart5', 'line', sheetNames, sheetRates, '平均完成率 (%)', 100);
 
-            // 6. 累計工時 (Bar - 由大到小排序)
             const opHours = {};
             allRows.forEach(r => {
                 const op = r.作業人員 || "未指派";
@@ -745,7 +739,6 @@
             link.click();
         }
 
-        // 一鍵依序匯出 6 張分析圖表
         document.getElementById('exportAllChartsBtn').addEventListener('click', () => {
             const chartIds = ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'];
             chartIds.forEach((id, idx) => {
@@ -841,3 +834,4 @@
     </script>
 </body>
 </html>
+```[cite: 1]
