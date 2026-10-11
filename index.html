@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    <!-- 3. 6張分析圖表標準大視窗 Modal (modal-xl，改為橫3縱2排列) -->
+    <!-- 3. 6張分析圖表標準大視窗 Modal (橫3縱2排列) -->
     <div class="modal fade" id="chartsModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-scrollable" style="max-width: 95vw;">
             <div class="modal-content shadow-lg">
@@ -193,8 +193,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">4. 累積實際總發放金額 (折線圖)</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart4', '累積實際總發放金額.png')"><i class="fa-solid fa-download"></i></button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">4. 累積實際發放金額</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart4', '累積實際發放金額.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart4" height="210"></canvas></div>
                             </div>
@@ -202,8 +202,8 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="card shadow h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-1">
-                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">5. 各分頁完成率統計 (折線圖)</h6>
-                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart5', '各分頁完成率統計.png')"><i class="fa-solid fa-download"></i></button>
+                                    <h6 class="mb-0 fw-heavy text-dark" style="font-size: 0.9rem;">5. 各週完成率統計</h6>
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-2 fw-heavy" onclick="exportChartAsPNG('chart5', '各週完成率統計.png')"><i class="fa-solid fa-download"></i></button>
                                 </div>
                                 <div class="card-body p-2"><canvas id="chart5" height="210"></canvas></div>
                             </div>
@@ -628,25 +628,35 @@
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
 
+        // 輔助函式：將物件資料根據數值大小進行由大到小 (降冪) 排序
+        function sortObjDescending(obj) {
+            const sortedEntries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
+            const sortedKeys = sortedEntries.map(item => item[0]);
+            const sortedValues = sortedEntries.map(item => item[1]);
+            return { keys: sortedKeys, values: sortedValues };
+        }
+
         function renderAllCharts() {
             let allRows = [];
             Object.values(allDataCache).forEach(s => allRows.push(...Object.values(s)));
 
-            // 1. 累積完成品號數量 (Bar)
+            // 1. 累積完成品號數量 (Bar - 由大到小排序)
             const itemCounts = {};
             allRows.forEach(r => {
                 const item = r.品號 || "未知品號";
                 itemCounts[item] = (itemCounts[item] || 0) + Number(r.實際完成數 || 0);
             });
-            createOrUpdateChart('chart1', 'bar', Object.keys(itemCounts), Object.values(itemCounts), '完成數量');
+            const sortedItemCounts = sortObjDescending(itemCounts);
+            createOrUpdateChart('chart1', 'bar', sortedItemCounts.keys, sortedItemCounts.values, '完成數量');
 
-            // 2. 累計實際發放金額 (Bar)
+            // 2. 累計實際發放金額 (Bar - 由大到小排序)
             const itemPrices = {};
             allRows.forEach(r => {
                 const item = r.品號 || "未知品號";
                 itemPrices[item] = (itemPrices[item] || 0) + Number(r.實際總價 || 0);
             });
-            createOrUpdateChart('chart2', 'bar', Object.keys(itemPrices), Object.values(itemPrices), '金額 (NT$)');
+            const sortedItemPrices = sortObjDescending(itemPrices);
+            createOrUpdateChart('chart2', 'bar', sortedItemPrices.keys, sortedItemPrices.values, '金額 (NT$)');
 
             // 3. 作業人員累積發放金額 (Doughnut + 啟用 DataLabels 金額標籤)
             const opPrices = {};
@@ -664,7 +674,7 @@
                 }
             }, [ChartDataLabels]);
 
-            // 4. 累積實際總發放金額 (改為折線圖 Line - 累加各分頁金額)
+            // 4. 累積實際發放金額 (Line 折線圖 - 累加各分頁金額)
             const sheetNames = Object.keys(allDataCache);
             let cumulativeSum = 0;
             const sheetCumulativeTotals = sheetNames.map(name => {
@@ -673,9 +683,9 @@
                 cumulativeSum += sum;
                 return cumulativeSum;
             });
-            createOrUpdateChart('chart4', 'line', sheetNames, sheetCumulativeTotals, '累積實際總發放金額 (NT$)');
+            createOrUpdateChart('chart4', 'line', sheetNames, sheetCumulativeTotals, '累積實際發放金額 (NT$)');
 
-            // 5. 各分頁完成率統計 (Line 折線圖)
+            // 5. 各週完成率統計 (Line 折線圖)
             const sheetRates = sheetNames.map(name => {
                 let totalQ = 0, totalA = 0;
                 Object.values(allDataCache[name]).forEach(r => {
@@ -686,7 +696,7 @@
             });
             createOrUpdateChart('chart5', 'line', sheetNames, sheetRates, '平均完成率 (%)', 100);
 
-            // 6. 累計工時 (Bar)
+            // 6. 累計工時 (Bar - 由大到小排序)
             const opHours = {};
             allRows.forEach(r => {
                 const op = r.作業人員 || "未指派";
@@ -694,7 +704,8 @@
                 const act = Number(r["實際完成數"] || 0);
                 opHours[op] = (opHours[op] || 0) + (h * act);
             });
-            createOrUpdateChart('chart6', 'bar', Object.keys(opHours), Object.values(opHours), '累計總工時 (H)');
+            const sortedOpHours = sortObjDescending(opHours);
+            createOrUpdateChart('chart6', 'bar', sortedOpHours.keys, sortedOpHours.values, '累計總工時 (H)');
         }
 
         function createOrUpdateChart(canvasId, type, labels, data, labelName, maxY = null, customOptions = {}, pluginsList = []) {
@@ -715,7 +726,6 @@
                     datasets: [{
                         label: labelName,
                         data: data,
-                        backgroundColor: type === 'doughnut' ? ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'] : 'rgba(59, 130, 246, 0.7)',
                         borderColor: '#3b82f6',
                         backgroundColor: type === 'line' ? 'rgba(59, 130, 246, 0.2)' : ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
                         fill: type === 'line',
@@ -751,8 +761,8 @@
                             '1_累積完成品號數量.png',
                             '2_累計實際發放金額.png',
                             '3_作業人員累積發放金額.png',
-                            '4_累積實際總發放金額.png',
-                            '5_各分頁完成率統計.png',
+                            '4_累積實際發放金額.png',
+                            '5_各週完成率統計.png',
                             '6_累計工時統計.png'
                         ];
                         link.download = titles[idx];
