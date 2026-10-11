@@ -22,7 +22,6 @@
         .dashboard-card h6 { font-size: 0.8rem; margin-bottom: 2px; font-weight: 700; color: #495057; }
         .dashboard-card h3 { font-size: 1.25rem; font-weight: 800; }
         .table-fullscreen-container { min-height: 62vh; max-height: 66vh; overflow-y: auto; }
-        /* 雙擊編輯樣式 */
         .editable-cell { cursor: pointer; transition: background-color 0.2s; }
         .editable-cell:hover { background-color: #e9ecef; }
         .inline-input { width: 100%; border: 2px solid #3b82f6; border-radius: 4px; padding: 2px 5px; font-weight: 700; font-size: 0.9rem; background: #fff; }
@@ -71,8 +70,9 @@
 
         <!-- 頂部功能按鈕與儀表板 -->
         <div class="row g-2 mb-3 align-items-center">
-            <div class="col-xl-7 col-lg-8">
-                <div class="row g-2" id="dashboardCardsRow">
+            <!-- 儀表板卡片 (在入金分頁時會自動隱藏) -->
+            <div class="col-xl-6 col-lg-7" id="dashboardSection">
+                <div class="row g-2">
                     <div class="col-4">
                         <div class="card bg-white text-primary dashboard-card border border-primary">
                             <div class="card-body p-2">
@@ -99,8 +99,8 @@
                     </div>
                 </div>
             </div>
-            <!-- 功能按鈕群 -->
-            <div class="col-xl-5 col-lg-4 text-end">
+            <!-- 右上角功能按鈕群 (移至此處) -->
+            <div class="col-xl-6 col-lg-5 text-end ms-auto">
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
                     <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" id="openChartsModalBtn">
                         <i class="fa-solid fa-chart-pie"></i> 生成 6 張分析圖表 (全螢幕)
@@ -401,9 +401,8 @@
             }
         }
 
-        // 雙擊轉為輸入框編輯
         window.makeEditable = function(tdElement, key, field, type = "text") {
-            if (tdElement.querySelector("input")) return; // 已經在編輯中
+            if (tdElement.querySelector("input")) return;
             const currentVal = tdElement.innerText.replace('$', '').replace('%', '').trim();
             tdElement.innerHTML = `<input type="${type}" class="inline-input" value="${currentVal === '-' ? '' : currentVal}" autofocus>`;
             const input = tdElement.querySelector("input");
@@ -415,9 +414,7 @@
 
             input.addEventListener("blur", save);
             input.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    save();
-                }
+                if (e.key === "Enter") save();
             });
         }
 
@@ -557,11 +554,12 @@
         }
 
         function updateDashboard() {
+            const dashboardSection = document.getElementById("dashboardSection");
             if (currentSheet === "DEPOSITS_PAGE") {
-                document.getElementById("totalCompletedCount").textContent = "-";
-                document.getElementById("totalActualPrice").textContent = "-";
-                document.getElementById("totalEstimatedPrice").textContent = "-";
+                dashboardSection.style.display = "none";
                 return;
+            } else {
+                dashboardSection.style.display = "block";
             }
 
             const sheetData = allDataCache[currentSheet] || {};
@@ -581,7 +579,8 @@
         // 綁定圖表彈窗按鈕
         document.getElementById("openChartsModalBtn").addEventListener("click", () => {
             renderAllCharts();
-            const modal = new bootstrap.Modal(document.getElementById("chartsModal"));
+            const modalElement = document.getElementById("chartsModal");
+            const modal = new bootstrap.Modal(modalElement);
             modal.show();
         });
 
