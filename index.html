@@ -163,7 +163,7 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable" style="max-width: 95vw;">
             <div class="modal-content shadow-lg">
                 <div class="modal-header bg-dark text-white py-2">
-                    <h5 class="modal-title fw-heavy"><i class="fa-solid fa-chart-column"></i> 後處理論件計酬 - 6 張商業分析圖表</h5>
+                    <h5 class="modal-title fw-heavy"><i class="fa-solid fa-chart-column"></i> 後處理論件計酬 - 分析圖表</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-3">
@@ -225,9 +225,14 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-white justify-content-between py-2">
-                    <button class="btn btn-dark fw-heavy px-4" id="exportAllChartsBtn">
-                        <i class="fa-solid fa-file-image"></i> 一鍵匯出所有 6 張圖表 (PNG)
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-dark fw-heavy px-3" id="exportAllChartsBtn">
+                            <i class="fa-solid fa-file-image"></i> 逐一匯出 6 張圖表 (PNG)
+                        </button>
+                        <button class="btn btn-success fw-heavy px-3" id="exportCombinedChartBtn">
+                            <i class="fa-solid fa-object-ungroup"></i> 一鍵匯出 6 合 1 總覽圖 (PNG)
+                        </button>
+                    </div>
                     <button type="button" class="btn btn-secondary fw-heavy px-4" data-bs-dismiss="modal">關閉視窗</button>
                 </div>
             </div>
@@ -705,10 +710,18 @@
             const ctx = document.getElementById(canvasId).getContext('2d');
             if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
 
+            const boldFont = { weight: 'bold', size: 12, family: 'Microsoft JhengHei' };
             const baseOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: type !== 'doughnut' ? { y: { beginAtZero: true, ...(maxY ? { max: maxY } : {}) } } : {},
+                plugins: {
+                    legend: { labels: { font: boldFont, color: '#111' } },
+                    ...(customOptions.plugins || {})
+                },
+                scales: type !== 'doughnut' ? {
+                    x: { ticks: { font: boldFont, color: '#111' }, grid: { color: '#e5e7eb' } },
+                    y: { beginAtZero: true, ticks: { font: boldFont, color: '#111' }, grid: { color: '#e5e7eb' }, ...(maxY ? { max: maxY } : {}) }
+                } : {},
                 ...customOptions
             };
 
@@ -719,11 +732,11 @@
                     datasets: [{
                         label: labelName,
                         data: data,
-                        borderColor: '#3b82f6',
-                        backgroundColor: type === 'line' ? 'rgba(59, 130, 246, 0.2)' : ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+                        borderColor: '#2563eb',
+                        backgroundColor: type === 'line' ? 'rgba(37, 99, 235, 0.2)' : ['#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0891b2'],
                         fill: type === 'line',
                         tension: type === 'line' ? 0.1 : 0,
-                        borderWidth: 2
+                        borderWidth: 3
                     }]
                 },
                 options: baseOptions,
@@ -731,37 +744,123 @@
             });
         }
 
+        // 轉換圖表為白底 PNG 並下載
         window.exportChartAsPNG = function(canvasId, filename) {
-            const link = document.createElement('a');
-            link.href = document.getElementById(canvasId).toDataURL('image/png');
-            link.download = filename;
-            link.click();
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            if (chartInstances[canvasId]) chartInstances[canvasId].update();
+
+            setTimeout(() => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tCtx = tempCanvas.getContext('2d');
+
+                // 填上不透明白色背景
+                tCtx.fillStyle = '#ffffff';
+                tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tCtx.drawImage(canvas, 0, 0);
+
+                const link = document.createElement('a');
+                link.href = tempCanvas.toDataURL('image/png');
+                link.download = filename;
+                link.click();
+            }, 200);
         }
 
+        // 逐一匯出 6 張圖表
         document.getElementById('exportAllChartsBtn').addEventListener('click', () => {
             const chartIds = ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'];
             chartIds.forEach((id, idx) => {
-                const canvas = document.getElementById(id);
-                if (canvas) {
-                    if (chartInstances[id]) {
-                        chartInstances[id].update();
-                    }
-                    setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.href = canvas.toDataURL('image/png');
-                        const titles = [
-                            '1_累積完成品號數量.png',
-                            '2_產品累積產生金額.png',
-                            '3_作業人員累積發放金額.png',
-                            '4_累積實際發放金額.png',
-                            '5_各週累積完成數量.png',
-                            '6_累計工時統計.png'
-                        ];
-                        link.download = titles[idx];
-                        link.click();
-                    }, idx * 400);
-                }
+                const titles = [
+                    '1_累積完成品號數量.png',
+                    '2_產品累積產生金額.png',
+                    '3_作業人員累積發放金額.png',
+                    '4_累積實際發放金額.png',
+                    '5_各週累積完成數量.png',
+                    '6_累計工時統計.png'
+                ];
+                setTimeout(() => {
+                    exportChartAsPNG(id, titles[idx]);
+                }, idx * 400);
             });
+        });
+
+        // 一鍵匯出 6 合 1 總覽圖
+        document.getElementById('exportCombinedChartBtn').addEventListener('click', () => {
+            const chartIds = ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'];
+            
+            // 確保所有圖表最新狀態已繪製
+            chartIds.forEach(id => {
+                if (chartInstances[id]) chartInstances[id].update();
+            });
+
+            setTimeout(() => {
+                const imgWidth = 800;
+                const imgHeight = 450;
+                const cols = 3;
+                const rows = 2;
+                const padding = 40;
+                const headerHeight = 80;
+
+                const combinedCanvas = document.createElement('canvas');
+                combinedCanvas.width = cols * imgWidth + (cols + 1) * padding;
+                combinedCanvas.height = rows * imgHeight + (rows + 1) * padding + headerHeight;
+                const cCtx = combinedCanvas.getContext('2d');
+
+                // 背景填白
+                cCtx.fillStyle = '#ffffff';
+                cCtx.fillRect(0, 0, combinedCanvas.width, combinedCanvas.height);
+
+                // 繪製大標題
+                cCtx.fillStyle = '#111827';
+                cCtx.font = 'bold 28px "Microsoft JhengHei", Arial';
+                cCtx.textAlign = 'center';
+                cCtx.fillText('後處理論件計酬 - 商業分析圖表總覽', combinedCanvas.width / 2, 50);
+
+                let loadedCount = 0;
+                chartIds.forEach((id, index) => {
+                    const srcCanvas = document.getElementById(id);
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = srcCanvas.width;
+                    tempCanvas.height = srcCanvas.height;
+                    const tCtx = tempCanvas.getContext('2d');
+                    tCtx.fillStyle = '#ffffff';
+                    tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    tCtx.drawImage(srcCanvas, 0, 0);
+
+                    const img = new Image();
+                    img.onload = () => {
+                        const col = index % cols;
+                        const row = Math.floor(index / cols);
+                        const x = padding + col * (imgWidth + padding);
+                        const y = headerHeight + padding + row * (imgHeight + padding);
+
+                        // 繪製圖表卡片外框與陰影背景
+                        cCtx.save();
+                        cCtx.fillStyle = '#f9fafb';
+                        cCtx.strokeStyle = '#e5e7eb';
+                        cCtx.lineWidth = 2;
+                        cCtx.beginPath();
+                        cCtx.roundRect(x, y, imgWidth, imgHeight, 10);
+                        cCtx.fill();
+                        cCtx.stroke();
+                        cCtx.restore();
+
+                        // 繪製圖表圖片
+                        cCtx.drawImage(img, x + 15, y + 15, imgWidth - 30, imgHeight - 30);
+
+                        loadedCount++;
+                        if (loadedCount === chartIds.length) {
+                            const link = document.createElement('a');
+                            link.href = combinedCanvas.toDataURL('image/png');
+                            link.download = '後處理論件計酬_6合1分析總覽圖.png';
+                            link.click();
+                        }
+                    };
+                    img.src = tempCanvas.toDataURL('image/png');
+                });
+            }, 300);
         });
 
         document.getElementById('exportExcelBtn').addEventListener('click', () => {
