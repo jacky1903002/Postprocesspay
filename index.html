@@ -16,16 +16,14 @@
         body { background-color: #f4f6f9; font-family: "Microsoft JhengHei", Arial, sans-serif; }
         .login-container { max-width: 420px; margin-top: 10vh; }
         .app-container { display: none; }
-        /* 商業活潑風格：字體加粗、深白色質感卡片 */
         .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .fw-heavy { font-weight: 700 !important; }
-        /* 縮小卡片為 1/2 大小 */
         .dashboard-card { padding: 8px 12px !important; }
         .dashboard-card h6 { font-size: 0.8rem; margin-bottom: 2px; font-weight: 700; color: #495057; }
         .dashboard-card h3 { font-size: 1.25rem; font-weight: 800; }
-        /* 表格填滿全螢幕感 */
-        .table-fullscreen-container { min-height: 70vh; max-height: 75vh; overflow-y: auto; }
-        /* 全螢幕圖表 Modal 樣式 */
+        .table-fullscreen-container { min-height: 62vh; max-height: 66vh; overflow-y: auto; }
+        .inline-input { width: 100%; border: 1px solid #ced4da; border-radius: 4px; padding: 2px 5px; font-weight: 700; font-size: 0.9rem; }
+        .inline-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.25); }
         .modal-fullscreen .modal-content { background-color: #f8f9fa; }
     </style>
 </head>
@@ -71,7 +69,6 @@
 
         <!-- 頂部功能按鈕與儀表板 -->
         <div class="row g-2 mb-3 align-items-center">
-            <!-- 儀表板 1/2 大小 -->
             <div class="col-xl-7 col-lg-8">
                 <div class="row g-2" id="dashboardCardsRow">
                     <div class="col-4">
@@ -106,8 +103,8 @@
                     <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#chartsModal">
                         <i class="fa-solid fa-chart-pie"></i> 生成 6 張分析圖表 (全螢幕)
                     </button>
-                    <button class="btn btn-success btn-sm fw-heavy px-3 shadow-sm" id="addNewRecordBtn" data-bs-toggle="modal" data-bs-target="#addModal">
-                        <i class="fa-solid fa-plus"></i> 新增記錄
+                    <button class="btn btn-success btn-sm fw-heavy px-3 shadow-sm" id="addNewRowBtn" onclick="addNewRow()">
+                        <i class="fa-solid fa-plus"></i> 新增一列
                     </button>
                     <label class="btn btn-warning btn-sm fw-heavy px-3 text-dark shadow-sm mb-0" style="cursor: pointer;">
                         <i class="fa-solid fa-file-excel"></i> 匯入 Excel
@@ -125,10 +122,10 @@
             <!-- 動態產生 -->
         </ul>
 
-        <!-- 全螢幕滿版資料表格區域 -->
+        <!-- 全螢幕滿版資料表格區域 (附帶右下角簽收欄位) -->
         <div class="card shadow-sm border-0 mb-4 w-100 bg-white">
             <div class="card-body p-3">
-                <div class="table-responsive table-fullscreen-container">
+                <div class="table-responsive table-fullscreen-container mb-2">
                     <table class="table table-hover table-bordered align-middle mb-0" id="dynamicTable">
                         <thead class="table-dark sticky-top" id="tableHeader" style="font-size: 0.95rem;">
                             <!-- 動態表頭 -->
@@ -137,6 +134,12 @@
                             <!-- 動態內容 -->
                         </tbody>
                     </table>
+                </div>
+                <!-- 右下角簽收欄位 -->
+                <div class="d-flex justify-content-end align-items-center pt-2 border-top">
+                    <div class="fw-heavy text-dark fs-6 pe-3">
+                        簽收人：<span style="display: inline-block; border-bottom: 2px solid #333; width: 180px; text-align: center;">&nbsp;</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,70 +217,6 @@
                     </button>
                     <button type="button" class="btn btn-secondary fw-heavy px-4" data-bs-dismiss="modal">關閉視窗</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 新增 / 編輯資料 Modal -->
-    <div class="modal fade" id="addModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content shadow">
-                <form id="workForm">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title fw-heavy" id="modalTitle">新增後處理工單記錄</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <input type="hidden" id="editRowKey">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">品號</label>
-                                <input type="text" class="form-control fw-heavy" id="itemNo" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">貨號</label>
-                                <input type="text" class="form-control fw-heavy" id="goodsNo" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">工單號碼</label>
-                                <input type="text" class="form-control fw-heavy" id="workOrder" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">數量 (預計數量)</label>
-                                <input type="number" class="form-control fw-heavy" id="quantity" required min="0">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">後處理工時 (H)</label>
-                                <input type="number" step="any" class="form-control fw-heavy" id="workHours" required min="0" placeholder="只能填數字">
-                                <div class="form-text text-danger fw-heavy" id="hourError" style="display:none;">只能填數字！</div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">單價 <small class="text-muted">(250*工時)</small></label>
-                                <input type="number" class="form-control bg-light fw-heavy" id="unitPrice" readonly>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">作業人員</label>
-                                <input type="text" class="form-control fw-heavy" id="operator" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">實際完成數</label>
-                                <input type="number" class="form-control fw-heavy" id="actualCompleted" required min="0">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-heavy">備註</label>
-                                <input type="text" class="form-control fw-heavy" id="remark">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary fw-heavy px-4" data-bs-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary fw-heavy px-4">儲存記錄</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -389,21 +328,6 @@
             lastSaveTimeEl.textContent = "上次儲存：" + new Date().toLocaleString();
         }
 
-        const workHoursInput = document.getElementById("workHours");
-        const unitPriceInput = document.getElementById("unitPrice");
-        const hourError = document.getElementById("hourError");
-
-        workHoursInput.addEventListener("input", (e) => {
-            const val = e.target.value;
-            if (val === "" || isNaN(val)) {
-                hourError.style.display = "block";
-                unitPriceInput.value = "";
-            } else {
-                hourError.style.display = "none";
-                unitPriceInput.value = Math.floor(250 * parseFloat(val));
-            }
-        });
-
         window.renderApp = function() {
             renderTabs();
             renderTable();
@@ -435,12 +359,6 @@
 
         window.switchSheet = function(name) {
             currentSheet = name;
-            const addNewBtn = document.getElementById("addNewRecordBtn");
-            if (currentSheet === "DEPOSITS_PAGE") {
-                addNewBtn.style.display = "none";
-            } else {
-                addNewBtn.style.display = "inline-block";
-            }
             renderApp();
         }
 
@@ -451,6 +369,68 @@
                 set(ref(db, "sheets"), allDataCache);
                 currentSheet = name;
                 renderApp();
+            }
+        }
+
+        window.addNewRow = function() {
+            if (currentSheet === "DEPOSITS_PAGE") {
+                const newDepKey = 'dep_' + Date.now();
+                depositsCache[newDepKey] = { "日期": "新日期", "入金金額": 0 };
+                set(ref(db, "deposits"), depositsCache).then(() => renderApp());
+            } else {
+                const newRowKey = 'row_' + Date.now();
+                allDataCache[currentSheet][newRowKey] = {
+                    "品號": "新品號", "貨號": "新貨號", "工單號碼": "新工單",
+                    "數量": 0, "後處理工時(H)": 0, "單價": 0, "作業人員": "未指派",
+                    "預計總價": 0, "實際完成數": 0, "實際總價": 0, "完成率": 0, "備註": ""
+                };
+                set(ref(db, "sheets"), allDataCache).then(() => renderApp());
+            }
+        }
+
+        window.deleteRowItem = function(key) {
+            if (confirm("確定刪除此列記錄？")) {
+                if (currentSheet === "DEPOSITS_PAGE") {
+                    delete depositsCache[key];
+                    set(ref(db, "deposits"), depositsCache).then(() => renderApp());
+                } else {
+                    delete allDataCache[currentSheet][key];
+                    set(ref(db, "sheets"), allDataCache).then(() => renderApp());
+                }
+            }
+        }
+
+        window.updateCellData = function(key, field, value) {
+            if (currentSheet === "DEPOSITS_PAGE") {
+                if (field === '入金金額') {
+                    depositsCache[key][field] = Number(value) || 0;
+                } else {
+                    depositsCache[key][field] = value;
+                }
+                set(ref(db, "deposits"), depositsCache);
+                renderApp();
+            } else {
+                let row = allDataCache[currentSheet][key];
+                if (field === '數量' || field === '實際完成數') {
+                    row[field] = parseInt(value) || 0;
+                } else if (field === '後處理工時(H)') {
+                    row[field] = parseFloat(value) || 0;
+                    row['單價'] = Math.floor(250 * row[field]);
+                } else {
+                    row[field] = value;
+                }
+
+                const qty = Number(row['數量'] || 0);
+                const unitPrice = Number(row['單價'] || 0);
+                const actualComp = Number(row['實際完成數'] || 0);
+
+                row['預計總價'] = qty * unitPrice;
+                row['實際總價'] = unitPrice * actualComp;
+                row['完成率'] = qty > 0 ? (actualComp / qty) : 0;
+
+                set(ref(db, `sheets/${currentSheet}/${key}`), row).then(() => {
+                    updateDashboard();
+                });
             }
         }
 
@@ -483,9 +463,9 @@
                     totalDeposit += Number(d.入金金額 || 0);
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td class="fw-heavy">${d.日期 || ''}</td>
-                        <td class="fw-heavy text-success">$${Number(d.入金金額 || 0).toLocaleString()}</td>
-                        <td><button class="btn btn-sm btn-outline-danger fw-heavy py-0" onclick="deleteDeposit('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button></td>
+                        <td><input type="text" class="inline-input" value="${d.日期 || ''}" onchange="updateCellData('${key}', '日期', this.value)"></td>
+                        <td><input type="number" class="inline-input text-success" value="${d.入金金額 || 0}" onchange="updateCellData('${key}', '入金金額', this.value)"></td>
+                        <td><button class="btn btn-sm btn-outline-danger fw-heavy py-0" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button></td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -509,12 +489,12 @@
                         <th class="fw-heavy">工單號碼</th>
                         <th class="fw-heavy">數量</th>
                         <th class="fw-heavy">後處理工時(H)</th>
-                        <th class="fw-heavy">單價</th>
+                        <th class="fw-heavy bg-light text-secondary">單價 (公式)</th>
                         <th class="fw-heavy">作業人員</th>
-                        <th class="fw-heavy">預計總價</th>
+                        <th class="fw-heavy bg-light text-secondary">預計總價 (公式)</th>
                         <th class="fw-heavy">實際完成數</th>
-                        <th class="fw-heavy">實際總價</th>
-                        <th class="fw-heavy">完成率</th>
+                        <th class="fw-heavy bg-light text-secondary">實際總價 (公式)</th>
+                        <th class="fw-heavy bg-light text-secondary">完成率 (公式)</th>
                         <th class="fw-heavy">備註</th>
                         <th class="fw-heavy" style="width: 100px;">操作</th>
                     </tr>
@@ -524,7 +504,7 @@
                 const keys = Object.keys(sheetData);
 
                 if (keys.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-4 fw-heavy">此工作表目前無記錄</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-4 fw-heavy">此工作表目前無記錄，請點擊上方「新增一列」按鈕</td></tr>`;
                     return;
                 }
 
@@ -533,21 +513,20 @@
                     const ratePercent = ((row.完成率 || 0) * 100).toFixed(1) + "%";
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td class="fw-heavy">${row.品號 || ''}</td>
-                        <td class="fw-heavy">${row.貨號 || ''}</td>
-                        <td class="fw-heavy">${row.工單號碼 || ''}</td>
-                        <td class="fw-heavy">${row.數量 || 0}</td>
-                        <td class="fw-heavy">${row["後處理工時(H)"] || 0}</td>
-                        <td class="fw-heavy text-primary">$${row.單價 || 0}</td>
-                        <td class="fw-heavy">${row.作業人員 || ''}</td>
-                        <td class="fw-heavy">$${row.預計總價 || 0}</td>
-                        <td class="fw-heavy">${row.实际完成数 || row.實際完成數 || 0}</td>
-                        <td class="fw-heavy text-success">$${row.實際總價 || 0}</td>
-                        <td><span class="badge bg-info text-dark fw-heavy">${ratePercent}</span></td>
-                        <td class="fw-heavy">${row.備註 || ''}</td>
+                        <td><input type="text" class="inline-input" value="${row.品號 || ''}" onchange="updateCellData('${key}', '品號', this.value)"></td>
+                        <td><input type="text" class="inline-input" value="${row.貨號 || ''}" onchange="updateCellData('${key}', '貨號', this.value)"></td>
+                        <td><input type="text" class="inline-input" value="${row.工單號碼 || ''}" onchange="updateCellData('${key}', '工單號碼', this.value)"></td>
+                        <td><input type="number" class="inline-input" value="${row.數量 || 0}" onchange="updateCellData('${key}', '數量', this.value)"></td>
+                        <td><input type="number" step="any" class="inline-input" value="${row["後處理工時(H)"] || 0}" onchange="updateCellData('${key}', '後處理工時(H)', this.value)"></td>
+                        <td class="bg-light fw-bold text-primary">$<span id="unit_${key}">${row.單價 || 0}</span></td>
+                        <td><input type="text" class="inline-input" value="${row.作業人員 || ''}" onchange="updateCellData('${key}', '作業人員', this.value)"></td>
+                        <td class="bg-light fw-bold">$<span id="est_${key}">${row.預計總價 || 0}</span></td>
+                        <td><input type="number" class="inline-input" value="${row.實際完成數 || 0}" onchange="updateCellData('${key}', '實際完成數', this.value)"></td>
+                        <td class="bg-light fw-bold text-success">$<span id="act_${key}">${row.實際總價 || 0}</span></td>
+                        <td class="bg-light"><span class="badge bg-info text-dark fw-heavy" id="rate_${key}">${ratePercent}</span></td>
+                        <td><input type="text" class="inline-input" value="${row.備註 || ''}" onchange="updateCellData('${key}', '備註', this.value)"></td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary fw-heavy py-0 px-1 me-1" onclick="editRow('${key}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-outline-danger fw-heavy py-0 px-1" onclick="deleteRow('${key}')"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn btn-sm btn-outline-danger fw-heavy py-0 px-2" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -577,77 +556,7 @@
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
 
-        const workForm = document.getElementById("workForm");
-        workForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const editKey = document.getElementById("editRowKey").value;
-            const hoursVal = document.getElementById("workHours").value;
-
-            if (isNaN(hoursVal) || hoursVal === "") {
-                alert("工時必須為數字！");
-                return;
-            }
-
-            const qty = parseInt(document.getElementById("quantity").value);
-            const hours = parseFloat(hoursVal);
-            const unitPrice = Math.floor(250 * hours);
-            const actualComp = parseInt(document.getElementById("actualCompleted").value);
-
-            const rowData = {
-                "品號": document.getElementById("itemNo").value,
-                "貨號": document.getElementById("goodsNo").value,
-                "工單號碼": document.getElementById("workOrder").value,
-                "數量": qty,
-                "後處理工時(H)": hours,
-                "單價": unitPrice,
-                "作業人員": document.getElementById("operator").value,
-                "預計總價": qty * unitPrice,
-                "實際完成數": actualComp,
-                "實際總價": unitPrice * actualComp,
-                "完成率": qty > 0 ? (actualComp / qty) : 0,
-                "備註": document.getElementById("remark").value || ""
-            };
-
-            if (editKey) {
-                update(ref(db, `sheets/${currentSheet}/${editKey}`), rowData).then(() => closeModal());
-            } else {
-                set(push(ref(db, `sheets/${currentSheet}`)), rowData).then(() => closeModal());
-            }
-        });
-
-        function closeModal() {
-            bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
-            workForm.reset();
-            document.getElementById("editRowKey").value = "";
-        }
-
-        window.editRow = function(key) {
-            const row = allDataCache[currentSheet][key];
-            document.getElementById("editRowKey").value = key;
-            document.getElementById("itemNo").value = row.品號;
-            document.getElementById("goodsNo").value = row.貨號;
-            document.getElementById("workOrder").value = row.工單號碼;
-            document.getElementById("quantity").value = row.數量;
-            document.getElementById("workHours").value = row["後處理工時(H)"];
-            document.getElementById("unitPrice").value = row.單價;
-            document.getElementById("operator").value = row.作業人員;
-            document.getElementById("actualCompleted").value = row.實際完成數;
-            document.getElementById("remark").value = row.備註 || "";
-            document.getElementById("modalTitle").textContent = "編輯記錄";
-            new bootstrap.Modal(document.getElementById("addModal")).show();
-        }
-
-        window.deleteRow = function(key) {
-            if (confirm("確定刪除此記錄？")) remove(ref(db, `sheets/${currentSheet}/${key}`));
-        }
-
-        window.deleteDeposit = function(key) {
-            if (confirm("確定刪除此入金記錄？")) remove(ref(db, `deposits/${key}`));
-        }
-
-        // 6張圖表產生邏輯
         function renderAllCharts() {
-            const sheetData = currentSheet !== "DEPOSITS_PAGE" ? (allDataCache[currentSheet] || {}) : {};
             let allRows = [];
             Object.values(allDataCache).forEach(s => allRows.push(...Object.values(s)));
 
@@ -736,6 +645,7 @@
             });
         });
 
+        // 匯出 Excel (並在底部帶入簽收欄位)
         document.getElementById('exportExcelBtn').addEventListener('click', () => {
             const wb = XLSX.utils.book_new();
             Object.keys(allDataCache).forEach(sheetName => {
@@ -745,9 +655,15 @@
                     "預計總價": r.預計總價, "實際完成數": r.實際完成數, "實際總價": r.實際總價,
                     "完成率": r.完成率, "備註": r.備註 || ""
                 }));
+                // 在 Excel 底部加入空白列與簽收欄位
+                dataArray.push({});
+                dataArray.push({ "品號": "簽收人：___________________" });
+
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dataArray), sheetName);
             });
             const depArray = Object.values(depositsCache).map(d => ({ "日期": d.日期, "入金金額": d.入金金額 }));
+            depArray.push({});
+            depArray.push({ "日期": "簽收人：___________________" });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(depArray), "入金記錄");
             XLSX.writeFile(wb, "後處理論件計酬完整統計報表.xlsx");
         });
@@ -763,7 +679,9 @@
                         const jsonRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
                         const newDeps = {};
                         jsonRows.forEach((r, idx) => {
-                            newDeps[`dep_${idx}`] = { "日期": r["日期"], "入金金額": Number(r["入金金額"] || 0) };
+                            if (r["日期"] && !String(r["日期"]).includes("簽收人")) {
+                                newDeps[`dep_${idx}`] = { "日期": r["日期"], "入金金額": Number(r["入金金額"] || 0) };
+                            }
                         });
                         set(ref(db, "deposits"), newDeps);
                         return;
@@ -772,18 +690,20 @@
                     const jsonRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
                     const formattedRows = {};
                     jsonRows.forEach((r, idx) => {
-                        const qty = Number(r["數量"] || 0);
-                        const hours = Number(r["後處理工時(H)"] || 0);
-                        const unitPrice = Math.floor(250 * hours);
-                        const actualComp = Number(r["實際完成數"] || 0);
-                        
-                        formattedRows[`row_${idx}`] = {
-                            "品號": r["品號"] || "", "貨號": r["貨號"] || "", "工單號碼": r["工單號碼"] || "",
-                            "數量": qty, "後處理工時(H)": hours, "單價": unitPrice,
-                            "作業人員": r["作業人員"] || "", "預計總價": qty * unitPrice,
-                            "實際完成數": actualComp, "實際總價": unitPrice * actualComp,
-                            "完成率": qty > 0 ? (actualComp / qty) : 0, "備註": r["備註"] || ""
-                        };
+                        if (r["品號"] && !String(r["品號"]).includes("簽收人")) {
+                            const qty = Number(r["數量"] || 0);
+                            const hours = Number(r["後處理工時(H)"] || 0);
+                            const unitPrice = Math.floor(250 * hours);
+                            const actualComp = Number(r["實際完成數"] || 0);
+                            
+                            formattedRows[`row_${idx}`] = {
+                                "品號": r["品號"] || "", "貨號": r["貨號"] || "", "工單號碼": r["工單號碼"] || "",
+                                "數量": qty, "後處理工時(H)": hours, "單價": unitPrice,
+                                "作業人員": r["作業人員"] || "", "預計總價": qty * unitPrice,
+                                "實際完成數": actualComp, "實際總價": unitPrice * actualComp,
+                                "完成率": qty > 0 ? (actualComp / qty) : 0, "備註": r["備註"] || ""
+                            };
+                        }
                     });
                     allDataCache[sheetName] = formattedRows;
                 });
