@@ -7,7 +7,6 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 圖標 -->
-    <link rel="stylesheet-all" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS (Excel 匯入匯出) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -16,6 +15,10 @@
     <style>
         .login-container { max-width: 400px; margin-top: 10vh; }
         .app-container { display: none; }
+        /* 縮小儀表板卡片為 1/2 大小 */
+        .dashboard-card { padding: 10px 15px !important; }
+        .dashboard-card h6 { font-size: 0.85rem; margin-bottom: 2px; }
+        .dashboard-card h3 { font-size: 1.35rem; }
     </style>
 </head>
 <body class="bg-light">
@@ -42,11 +45,11 @@
     </div>
 
     <!-- 2. 主系統畫面 -->
-    <div id="appSection" class="container-fluid py-4 app-container">
+    <div id="appSection" class="container-fluid px-4 py-3 app-container">
         <!-- 頂部導覽列 / 狀態列 -->
-        <div class="row align-items-center mb-4 bg-white p-3 rounded shadow-sm mx-1">
+        <div class="row align-items-center mb-3 bg-white p-3 rounded shadow-sm mx-0">
             <div class="col-md-4">
-                <h4 class="mb-0 text-primary"><i class="fa-solid fa-calculator"></i> 後處理論件計酬統計</h4>
+                <h4 class="mb-0 text-primary"><i class="fa-solid fa-calculator"></i> 後處理論件計酬統計系統</h4>
             </div>
             <div class="col-md-4 text-center">
                 <span id="connectionStatus" class="badge bg-secondary p-2 me-2">檢查連線中...</span>
@@ -58,114 +61,134 @@
             </div>
         </div>
 
-        <!-- 儀表板與操作按鈕 -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-primary text-white">
-                    <div class="card-body">
-                        <h6 class="card-title">累積完成產品總數</h6>
-                        <h3 id="totalCompletedCount" class="fw-bold mb-0">0</h3>
+        <!-- 頂部功能按鈕與儀表板 (針對當前分頁或全域) -->
+        <div class="row g-2 mb-3 align-items-center">
+            <!-- 儀表板 1/2 大小 -->
+            <div class="col-md-8">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 bg-primary text-white dashboard-card">
+                            <div class="card-body p-2">
+                                <h6 class="card-title">累積完成產品總數</h6>
+                                <h3 id="totalCompletedCount" class="fw-bold mb-0">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 bg-success text-white dashboard-card">
+                            <div class="card-body p-2">
+                                <h6 class="card-title">實際總發放金額 (NT$)</h6>
+                                <h3 id="totalActualPrice" class="fw-bold mb-0">$0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 bg-info text-white dashboard-card">
+                            <div class="card-body p-2">
+                                <h6 class="card-title">預計總金額 (NT$)</h6>
+                                <h3 id="totalEstimatedPrice" class="fw-bold mb-0">$0</h3>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-success text-white">
-                    <div class="card-body">
-                        <h6 class="card-title">實際總發放金額 (NT$)</h6>
-                        <h3 id="totalActualPrice" class="fw-bold mb-0">$0</h3>
-                    </div>
+            <!-- 功能按鈕 -->
+            <div class="col-md-4 text-end">
+                <div class="d-flex justify-content-end gap-2 flex-wrap">
+                    <button class="btn btn-success btn-sm" id="addNewRecordBtn" data-bs-toggle="modal" data-bs-target="#addModal">
+                        <i class="fa-solid fa-plus"></i> 新增記錄
+                    </button>
+                    <label class="btn btn-warning btn-sm mb-0 text-dark" style="cursor: pointer;">
+                        <i class="fa-solid fa-file-excel"></i> 匯入 Excel
+                        <input type="file" id="excelFileinput" accept=".xlsx, .xls" class="d-none">
+                    </label>
+                    <button class="btn btn-secondary btn-sm" id="exportExcelBtn">
+                        <i class="fa-solid fa-file-arrow-down"></i> 匯出 Excel
+                    </button>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-info text-white">
-                    <div class="card-body">
-                        <h6 class="card-title">預計總金額 (NT$)</h6>
-                        <h3 id="totalEstimatedPrice" class="fw-bold mb-0">$0</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 d-flex align-items-center justify-content-end gap-2 flex-wrap">
-                <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addModal">
-                    <i class="fa-solid fa-plus"></i> 新增記錄
-                </button>
-                <label class="btn btn-warning shadow-sm mb-0 text-dark" style="cursor: pointer;">
-                    <i class="fa-solid fa-file-excel"></i> 匯入 Excel
-                    <input type="file" id="excelFileinput" accept=".xlsx, .xls" class="d-none">
-                </label>
-                <button class="btn btn-secondary shadow-sm" id="exportExcelBtn">
-                    <i class="fa-solid fa-file-arrow-down"></i> 匯出 Excel
-                </button>
             </div>
         </div>
 
-        <!-- 工作表標籤列 (動態切換工作表) -->
-        <ul class="nav nav-tabs mb-3" id="sheetTabs">
+        <!-- 工作表標籤列 (含「入金管理」分頁) -->
+        <ul class="nav nav-tabs mb-2" id="sheetTabs">
             <!-- 動態產生 -->
         </ul>
 
-        <!-- 資料表格 -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>品號</th>
-                                <th>貨號</th>
-                                <th>工單號碼</th>
-                                <th>數量</th>
-                                <th>後處理工時(H)</th>
-                                <th>單價</th>
-                                <th>作業人員</th>
-                                <th>預計總價</th>
-                                <th>實際完成數</th>
-                                <th>實際總價</th>
-                                <th>完成率</th>
-                                <th>備註</th>
-                                <th>操作</th>
-                            </tr>
+        <!-- 全螢幕最大化表格區域 / 或者是入金管理頁面 -->
+        <div id="mainContentArea" class="card shadow-sm border-0 mb-4 w-100">
+            <div class="card-body p-2">
+                <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
+                    <table class="table table-hover table-striped align-middle mb-0" id="dynamicTable">
+                        <thead class="table-dark sticky-top" id="tableHeader">
+                            <!-- 動態表頭 -->
                         </thead>
                         <tbody id="workTableBody">
-                            <tr>
-                                <td colspan="13" class="text-center text-muted py-4">載入資料中...</td>
-                            </tr>
+                            <!-- 動態內容 -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- 圖表分析區塊 -->
-        <div class="row g-4 mb-5">
-            <div class="col-xl-6">
+        <!-- 6張分析圖表區塊 -->
+        <div class="row g-3 mb-5">
+            <div class="col-xl-4 col-md-6">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-secondary">作業人員完成數量統計</h5>
-                        <button class="btn btn-sm btn-outline-primary" onclick="exportChartAsPNG('operatorChart', '作業人員完成數量統計.png')">
-                            <i class="fa-solid fa-download"></i> 匯出此圖 PNG
-                        </button>
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                        <h6 class="mb-0 text-secondary">累積完成品號數量</h6>
+                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart1', '累積完成品號數量.png')"><i class="fa-solid fa-download"></i></button>
                     </div>
-                    <div class="card-body">
-                        <canvas id="operatorChart" height="140"></canvas>
-                    </div>
+                    <div class="card-body p-2"><canvas id="chart1" height="130"></canvas></div>
                 </div>
             </div>
-            <div class="col-xl-6">
+            <div class="col-xl-4 col-md-6">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-secondary">工單完成率比較</h5>
-                        <button class="btn btn-sm btn-outline-primary" onclick="exportChartAsPNG('rateChart', '工單完成率比較.png')">
-                            <i class="fa-solid fa-download"></i> 匯出此圖 PNG
-                        </button>
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                        <h6 class="mb-0 text-secondary">累計實際發放金額</h6>
+                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart2', '累計實際發放金額.png')"><i class="fa-solid fa-download"></i></button>
                     </div>
-                    <div class="card-body">
-                        <canvas id="rateChart" height="140"></canvas>
-                    </div>
+                    <div class="card-body p-2"><canvas id="chart2" height="130"></canvas></div>
                 </div>
             </div>
-            <div class="col-12 text-center mt-3">
-                <button class="btn btn-dark btn-lg px-4" id="exportAllChartsBtn">
-                    <i class="fa-solid fa-file-image"></i> 一鍵匯出所有圖表 (PNG)
+            <div class="col-xl-4 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                        <h6 class="mb-0 text-secondary">作業人員累積發放金額</h6>
+                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart3', '作業人員累積發放金額.png')"><i class="fa-solid fa-download"></i></button>
+                    </div>
+                    <div class="card-body p-2"><canvas id="chart3" height="130"></canvas></div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                        <h6 class="mb-0 text-secondary">累積實際總發放金額</h6>
+                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart4', '累積實際總發放金額.png')"><i class="fa-solid fa-download"></i></button>
+                    </div>
+                    <div class="card-body p-2"><canvas id="chart4" height="130"></canvas></div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                        <h6 class="mb-0 text-secondary">各分頁完成率統計</h6>
+                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart5', '各分頁完成率統計.png')"><i class="fa-solid fa-download"></i></button>
+                    </div>
+                    <div class="card-body p-2"><canvas id="chart5" height="130"></canvas></div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                        <h6 class="mb-0 text-secondary">累計工時 (工時×實際完成數)</h6>
+                        <button class="btn btn-xs btn-outline-primary py-0 px-2" onclick="exportChartAsPNG('chart6', '累計工時統計.png')"><i class="fa-solid fa-download"></i></button>
+                    </div>
+                    <div class="card-body p-2"><canvas id="chart6" height="130"></canvas></div>
+                </div>
+            </div>
+            <div class="col-12 text-center mt-1">
+                <button class="btn btn-dark btn-sm px-4" id="exportAllChartsBtn">
+                    <i class="fa-solid fa-file-image"></i> 一鍵匯出所有 6 張圖表 (PNG)
                 </button>
             </div>
         </div>
@@ -183,68 +206,64 @@
                     <div class="modal-body">
                         <input type="hidden" id="editRowKey">
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">品號</label>
                                 <input type="text" class="form-control" id="itemNo" required>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">貨號</label>
                                 <input type="text" class="form-control" id="goodsNo" required>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">工單號碼</label>
                                 <input type="text" class="form-control" id="workOrder" required>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">數量 (預計數量)</label>
                                 <input type="number" class="form-control" id="quantity" required min="0">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">後處理工時 (H)</label>
-                                <input type="number" step="any" class="form-control" id="workHours" required min="0" placeholder="僅能填數字">
-                                <div class="form-text text-danger" id="hourError" style="display:none;">工時欄位只能填寫數字！</div>
+                                <input type="number" step="any" class="form-control" id="workHours" required min="0" placeholder="只能填數字">
+                                <div class="form-text text-danger" id="hourError" style="display:none;">只能填數字！</div>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">單價 <small class="text-muted">(自動計算: 250*工時)</small></label>
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label">單價 <small class="text-muted">(250*工時)</small></label>
                                 <input type="number" class="form-control bg-light" id="unitPrice" readonly>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">作業人員</label>
                                 <input type="text" class="form-control" id="operator" required>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">實際完成數</label>
                                 <input type="number" class="form-control" id="actualCompleted" required min="0">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">備註</label>
                                 <input type="text" class="form-control" id="remark">
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary">儲存記錄</button>
+                    <div class="modal-footer py-1">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary btn-sm">儲存記錄</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Firebase SDK 10 Modular 與 系統邏輯 -->
+    <!-- Firebase SDK 10 Modular 與系統邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // 你的 Firebase 專案設定
         const firebaseConfig = {
             apiKey: "AIzaSyB5-fDWurERD8zScyENywKa3Sh5pTAPj6k",
             authDomain: "postprocesspa.firebaseapp.com",
@@ -259,7 +278,6 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // DOM 元素
         const loginSection = document.getElementById("loginSection");
         const appSection = document.getElementById("appSection");
         const loginForm = document.getElementById("loginForm");
@@ -271,12 +289,11 @@
 
         let currentSheet = "W1";
         let allDataCache = {};
-        let operatorChartInstance = null;
-        let rateChartInstance = null;
+        let depositsCache = {}; // 存放「入金管理」資料
+        let chartInstances = {};
 
-        // 6. 連線狀況監控 (.info/connected)
-        const connectedRef = ref(db, ".info/connected");
-        onValue(connectedRef, (snap) => {
+        // 連線狀態監控
+        onValue(ref(db, ".info/connected"), (snap) => {
             if (snap.val() === true) {
                 connectionStatus.textContent = "已連線 Realtime DB";
                 connectionStatus.className = "badge bg-success p-2 me-2";
@@ -286,7 +303,6 @@
             }
         });
 
-        // 5. 登入狀態監控
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 loginSection.style.display = "none";
@@ -299,33 +315,25 @@
             }
         });
 
-        // 處理登入
         loginForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             loginError.classList.add("d-none");
-            const email = document.getElementById("loginEmail").value;
-            const password = document.getElementById("loginPassword").value;
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmailAndPassword(auth, document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
             } catch (error) {
                 loginError.textContent = "登入失敗：" + error.message;
                 loginError.classList.remove("d-none");
             }
         });
 
-        // 處理登出
-        logoutBtn.addEventListener("click", () => {
-            signOut(auth);
-        });
+        logoutBtn.addEventListener("click", () => signOut(auth));
 
-        // 即時監聽 Realtime Database 資料
         function initRealtimeSync() {
-            const dbRef = ref(db, "sheets");
-            onValue(dbRef, (snapshot) => {
+            // 同步工作表資料
+            onValue(ref(db, "sheets"), (snapshot) => {
                 if (snapshot.exists()) {
                     allDataCache = snapshot.val();
                 } else {
-                    // 若無資料，預設初始化 W1 工作表預設範本
                     allDataCache = {
                         "W1": {
                             "row1": {
@@ -335,20 +343,32 @@
                             }
                         }
                     };
-                    set(dbRef, allDataCache);
+                    set(ref(db, "sheets"), allDataCache);
                 }
                 updateLastSaveTime();
+                renderApp();
+            });
+
+            // 同步入金資料
+            onValue(ref(db, "deposits"), (snapshot) => {
+                if (snapshot.exists()) {
+                    depositsCache = snapshot.val();
+                } else {
+                    depositsCache = {
+                        "dep1": { "日期": "9月21日", "入金金額": 200000 },
+                        "dep2": { "日期": "10月7日", "入金金額": 200000 }
+                    };
+                    set(ref(db, "deposits"), depositsCache);
+                }
                 renderApp();
             });
         }
 
         function updateLastSaveTime() {
-            const now = new Date();
-            const timeString = now.toLocaleString();
-            lastSaveTimeEl.textContent = "上次儲存：" + timeString;
+            lastSaveTimeEl.textContent = "上次儲存：" + new Date().toLocaleString();
         }
 
-        // 自動計算邏輯 (Item 4)
+        // 工時即時計算單價
         const workHoursInput = document.getElementById("workHours");
         const unitPriceInput = document.getElementById("unitPrice");
         const hourError = document.getElementById("hourError");
@@ -360,24 +380,22 @@
                 unitPriceInput.value = "";
             } else {
                 hourError.style.display = "none";
-                const hours = parseFloat(val);
-                // 單價 = 250 * 工時 (無條件捨去到整數)
-                const unitPrice = Math.floor(250 * hours);
-                unitPriceInput.value = unitPrice;
+                unitPriceInput.value = Math.floor(250 * parseFloat(val));
             }
         });
 
-        // 渲染畫面與表格
         window.renderApp = function() {
             renderTabs();
             renderTable();
             updateDashboard();
-            renderCharts();
+            renderAllCharts();
         }
 
         function renderTabs() {
             const sheetTabs = document.getElementById("sheetTabs");
             sheetTabs.innerHTML = "";
+            
+            // 正常工作表分頁
             const sheetNames = Object.keys(allDataCache);
             sheetNames.forEach(name => {
                 const li = document.createElement("li");
@@ -385,15 +403,28 @@
                 li.innerHTML = `<button class="nav-link ${name === currentSheet ? 'active fw-bold' : ''}" onclick="switchSheet('${name}')">${name}</button>`;
                 sheetTabs.appendChild(li);
             });
+
             // 新增工作表按鈕
             const addLi = document.createElement("li");
-            addLi.className = "nav-item ms-2";
-            addLi.innerHTML = `<button class="btn btn-outline-secondary btn-sm mt-1" onclick="addNewSheetPrompt()"><i class="fa-solid fa-plus"></i> 新增工作表</button>`;
+            addLi.className = "nav-item ms-1";
+            addLi.innerHTML = `<button class="btn btn-outline-secondary btn-sm mt-1" onclick="addNewSheetPrompt()"><i class="fa-solid fa-plus"></i></button>`;
             sheetTabs.appendChild(addLi);
+
+            // 「入金管理」專用分頁
+            const depositLi = document.createElement("li");
+            depositLi.className = "nav-item ms-auto";
+            depositLi.innerHTML = `<button class="nav-link bg-warning text-dark ${currentSheet === 'DEPOSITS_PAGE' ? 'active fw-bold' : ''}" onclick="switchSheet('DEPOSITS_PAGE')"><i class="fa-solid fa-wallet"></i> 入金與剩餘金額管理</button>`;
+            sheetTabs.appendChild(depositLi);
         }
 
         window.switchSheet = function(name) {
             currentSheet = name;
+            const addNewBtn = document.getElementById("addNewRecordBtn");
+            if (currentSheet === "DEPOSITS_PAGE") {
+                addNewBtn.style.display = "none";
+            } else {
+                addNewBtn.style.display = "inline-block";
+            }
             renderApp();
         }
 
@@ -403,51 +434,125 @@
                 allDataCache[name] = {};
                 set(ref(db, "sheets"), allDataCache);
                 currentSheet = name;
+                renderApp();
             }
         }
 
         function renderTable() {
+            const thead = document.getElementById("tableHeader");
             const tbody = document.getElementById("workTableBody");
             tbody.innerHTML = "";
-            const sheetData = allDataCache[currentSheet] || {};
-            const keys = Object.keys(sheetData);
 
-            if (keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-4">此工作表目前無資料</td></tr>`;
-                return;
-            }
-
-            keys.forEach(key => {
-                const row = sheetData[key];
-                const ratePercent = (row.完成率 * 100).toFixed(1) + "%";
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${row.品號 || ''}</td>
-                    <td>${row.貨號 || ''}</td>
-                    <td>${row.工單號碼 || ''}</td>
-                    <td>${row.數量 || 0}</td>
-                    <td>${row["後處理工時(H)"] || 0}</td>
-                    <td>$${row.單價 || 0}</td>
-                    <td>${row.作業人員 || ''}</td>
-                    <td>$${row.預計總價 || 0}</td>
-                    <td>${row.實際完成數 || 0}</td>
-                    <td>$${row.實際總價 || 0}</td>
-                    <td><span class="badge bg-info text-dark">${ratePercent}</span></td>
-                    <td>${row.備註 || ''}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editRow('${key}')"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteRow('${key}')"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+            if (currentSheet === "DEPOSITS_PAGE") {
+                // 渲染入金頁面
+                thead.innerHTML = `
+                    <tr>
+                        <th>日期</th>
+                        <th>入金金額 (NT$)</th>
+                        <th>操作</th>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
-            });
+                
+                let totalDeposit = 0;
+                let totalActualDispatched = 0;
+
+                // 計算各分頁實際總發放金額累計
+                Object.values(allDataCache).forEach(sheet => {
+                    Object.values(sheet).forEach(row => {
+                        totalActualDispatched += Number(row.實際總價 || 0);
+                    });
+                });
+
+                const depKeys = Object.keys(depositsCache);
+                depKeys.forEach(key => {
+                    const d = depositsCache[key];
+                    totalDeposit += Number(d.入金金額 || 0);
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${d.日期 || ''}</td>
+                        <td>$${Number(d.入金金額 || 0).toLocaleString()}</td>
+                        <td><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteDeposit('${key}')"><i class="fa-solid fa-trash"></i></button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                const remainingAmount = totalDeposit - totalActualDispatched;
+
+                // 顯示總計列
+                const summaryTr = document.createElement("tr");
+                summaryTr.className = "table-info fw-bold";
+                summaryTr.innerHTML = `
+                    <td>累積入金總額：$${totalDeposit.toLocaleString()}</td>
+                    <td>實際總發放累計：$${totalActualDispatched.toLocaleString()}</td>
+                    <td class="${remainingAmount >= 0 ? 'text-success' : 'text-danger'}">剩餘金額：$${remainingAmount.toLocaleString()}</td>
+                `;
+                tbody.appendChild(summaryTr);
+
+            } else {
+                // 渲染一般工作表
+                thead.innerHTML = `
+                    <tr>
+                        <th>品號</th>
+                        <th>貨號</th>
+                        <th>工單號碼</th>
+                        <th>數量</th>
+                        <th>後處理工時(H)</th>
+                        <th>單價</th>
+                        <th>作業人員</th>
+                        <th>預計總價</th>
+                        <th>實際完成數</th>
+                        <th>實際總價</th>
+                        <th>完成率</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                `;
+
+                const sheetData = allDataCache[currentSheet] || {};
+                const keys = Object.keys(sheetData);
+
+                if (keys.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="13" class="text-center text-muted py-3">此工作表目前無記錄</td></tr>`;
+                    return;
+                }
+
+                keys.forEach(key => {
+                    const row = sheetData[key];
+                    const ratePercent = ((row.完成率 || 0) * 100).toFixed(1) + "%";
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${row.品號 || ''}</td>
+                        <td>${row.貨號 || ''}</td>
+                        <td>${row.工單號碼 || ''}</td>
+                        <td>${row.數量 || 0}</td>
+                        <td>${row["後處理工時(H)"] || 0}</td>
+                        <td>$${row.單價 || 0}</td>
+                        <td>${row.作業人員 || ''}</td>
+                        <td>$${row.預計總價 || 0}</td>
+                        <td>${row.實際完成數 || 0}</td>
+                        <td>$${row.實際總價 || 0}</td>
+                        <td><span class="badge bg-info text-dark">${ratePercent}</span></td>
+                        <td>${row.備註 || ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary py-0 px-1 me-1" onclick="editRow('${key}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteRow('${key}')"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
         }
 
         function updateDashboard() {
+            if (currentSheet === "DEPOSITS_PAGE") {
+                document.getElementById("totalCompletedCount").textContent = "-";
+                document.getElementById("totalActualPrice").textContent = "-";
+                document.getElementById("totalEstimatedPrice").textContent = "-";
+                return;
+            }
+
             const sheetData = allDataCache[currentSheet] || {};
-            let totalCompleted = 0;
-            let totalActual = 0;
-            let totalEstimated = 0;
+            let totalCompleted = 0, totalActual = 0, totalEstimated = 0;
 
             Object.values(sheetData).forEach(row => {
                 totalCompleted += Number(row.實際完成數 || 0);
@@ -460,7 +565,7 @@
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
 
-        // 新增與編輯表單提交
+        // 新增 / 編輯表單
         const workForm = document.getElementById("workForm");
         workForm.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -468,48 +573,42 @@
             const hoursVal = document.getElementById("workHours").value;
 
             if (isNaN(hoursVal) || hoursVal === "") {
-                alert("後處理工時(H) 欄位只能填寫數字！");
+                alert("工時必須為數字！");
                 return;
             }
 
-            const quantity = parseInt(document.getElementById("quantity").value);
-            const workHours = parseFloat(hoursVal);
-            const unitPrice = Math.floor(250 * workHours);
-            const actualCompleted = parseInt(document.getElementById("actualCompleted").value);
-            const estimatedPrice = quantity * unitPrice;
-            const actualPrice = unitPrice * actualCompleted;
-            const completionRate = quantity > 0 ? (actualCompleted / quantity) : 0;
+            const qty = parseInt(document.getElementById("quantity").value);
+            const hours = parseFloat(hoursVal);
+            const unitPrice = Math.floor(250 * hours);
+            const actualComp = parseInt(document.getElementById("actualCompleted").value);
 
             const rowData = {
                 "品號": document.getElementById("itemNo").value,
                 "貨號": document.getElementById("goodsNo").value,
                 "工單號碼": document.getElementById("workOrder").value,
-                "數量": quantity,
-                "後處理工時(H)": workHours,
+                "數量": qty,
+                "後處理工時(H)": hours,
                 "單價": unitPrice,
                 "作業人員": document.getElementById("operator").value,
-                "預計總價": estimatedPrice,
-                "實際完成數": actualCompleted,
-                "實際總價": actualPrice,
-                "完成率": completionRate,
+                "預計總價": qty * unitPrice,
+                "實際完成數": actualComp,
+                "實際總價": unitPrice * actualComp,
+                "完成率": qty > 0 ? (actualComp / qty) : 0,
                 "備註": document.getElementById("remark").value || ""
             };
 
-            const sheetRef = ref(db, `sheets/${currentSheet}`);
             if (editKey) {
-                update(ref(db, `sheets/${currentSheet}/${editKey}`), rowData).then(() => {
-                    bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
-                    workForm.reset();
-                    document.getElementById("editRowKey").value = "";
-                });
+                update(ref(db, `sheets/${currentSheet}/${editKey}`), rowData).then(() => closeModal());
             } else {
-                const newRef = push(sheetRef);
-                set(newRef, rowData).then(() => {
-                    bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
-                    workForm.reset();
-                });
+                set(push(ref(db, `sheets/${currentSheet}`)), rowData).then(() => closeModal());
             }
         });
+
+        function closeModal() {
+            bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+            workForm.reset();
+            document.getElementById("editRowKey").value = "";
+        }
 
         window.editRow = function(key) {
             const row = allDataCache[currentSheet][key];
@@ -523,127 +622,158 @@
             document.getElementById("operator").value = row.作業人員;
             document.getElementById("actualCompleted").value = row.實際完成數;
             document.getElementById("remark").value = row.備註 || "";
-            document.getElementById("modalTitle").textContent = "編輯後處理工單記錄";
-            
+            document.getElementById("modalTitle").textContent = "編輯記錄";
             new bootstrap.Modal(document.getElementById("addModal")).show();
         }
 
         window.deleteRow = function(key) {
-            if (confirm("確定要刪除這筆記錄嗎？")) {
-                remove(ref(db, `sheets/${currentSheet}/${key}`));
-            }
+            if (confirm("確定刪除此記錄？")) remove(ref(db, `sheets/${currentSheet}/${key}`));
         }
 
-        // 圖表繪製與 PNG 匯出
-        function renderCharts() {
-            const sheetData = allDataCache[currentSheet] || {};
+        window.deleteDeposit = function(key) {
+            if (confirm("確定刪除此入金記錄？")) remove(ref(db, `deposits/${key}`));
+        }
+
+        // ================= 6 張分析圖表產生邏輯 =================
+        function renderAllCharts() {
+            const sheetData = currentSheet !== "DEPOSITS_PAGE" ? (allDataCache[currentSheet] || {}) : {};
             const rows = Object.values(sheetData);
 
-            // 統計各作業人員完成數
-            const operatorMap = {};
+            // 收集全域資料用於跨分頁圖表
+            let allRows = [];
+            Object.values(allDataCache).forEach(s => allRows.push(...Object.values(s)));
+
+            // 1. 累積完成品號數量 (Bar)
+            const itemCounts = {};
+            rows.forEach(r => {
+                const item = r.品號 || "未知品號";
+                itemCounts[item] = (itemCounts[item] || 0) + Number(r.實際完成數 || 0);
+            });
+            createOrUpdateChart('chart1', 'bar', Object.keys(itemCounts), Object.values(itemCounts), '完成數量');
+
+            // 2. 累計實際發放金額 (Bar)
+            const itemPrices = {};
+            rows.forEach(r => {
+                const item = r.品號 || "未知品號";
+                itemPrices[item] = (itemPrices[item] || 0) + Number(r.實際總價 || 0);
+            });
+            createOrUpdateChart('chart2', 'bar', Object.keys(itemPrices), Object.values(itemPrices), '金額 (NT$)');
+
+            // 3. 作業人員累積發放金額 (Doughnut 或 Bar)
+            const opPrices = {};
             rows.forEach(r => {
                 const op = r.作業人員 || "未指派";
-                operatorMap[op] = (operatorMap[op] || 0) + Number(r.實際完成數 || 0);
+                opPrices[op] = (opPrices[op] || 0) + Number(r.實際總價 || 0);
             });
+            createOrUpdateChart('chart3', 'doughnut', Object.keys(opPrices), Object.values(opPrices), '發放金額');
 
-            const opLabels = Object.keys(operatorMap);
-            const opData = Object.values(operatorMap);
+            // 4. 累積實際總發放金額 (跨分頁比較 Bar)
+            const sheetNames = Object.keys(allDataCache);
+            const sheetTotals = sheetNames.map(name => {
+                let sum = 0;
+                Object.values(allDataCache[name]).forEach(r => sum += Number(r.實際總價 || 0));
+                return sum;
+            });
+            createOrUpdateChart('chart4', 'bar', sheetNames, sheetTotals, '各分頁實際總發放');
 
-            // 作業人員長條圖
-            const ctxOp = document.getElementById('operatorChart').getContext('2d');
-            if (operatorChartInstance) operatorChartInstance.destroy();
-            operatorChartInstance = new Chart(ctxOp, {
-                type: 'bar',
+            // 5. 各分頁完成率統計 (Line)
+            const sheetRates = sheetNames.map(name => {
+                let totalQ = 0, totalA = 0;
+                Object.values(allDataCache[name]).forEach(r => {
+                    totalQ += Number(r.數量 || 0);
+                    totalA += Number(r.實際完成數 || 0);
+                });
+                return totalQ > 0 ? Number(((totalA / totalQ) * 100).toFixed(1)) : 0;
+            });
+            createOrUpdateChart('chart5', 'line', sheetNames, sheetRates, '平均完成率 (%)', 100);
+
+            // 6. 累計工時 (公式: 後處理工時 * 實際完成數)
+            const opHours = {};
+            rows.forEach(r => {
+                const op = r.作業人員 || "未指派";
+                const h = Number(r["後處理工時(H)"] || 0);
+                const act = Number(r["實際完成數"] || 0);
+                opHours[op] = (opHours[op] || 0) + (h * act);
+            });
+            createOrUpdateChart('chart6', 'bar', Object.keys(opHours), Object.values(opHours), '累計總工時 (H)');
+        }
+
+        function createOrUpdateChart(canvasId, type, labels, data, labelName, maxY = null) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: type !== 'doughnut' ? { y: { beginAtZero: true, ...(maxY ? { max: maxY } : {}) } } : {}
+            };
+
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: type,
                 data: {
-                    labels: opLabels,
+                    labels: labels,
                     datasets: [{
-                        label: '實際完成總數',
-                        data: opData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                        label: labelName,
+                        data: data,
+                        backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(75, 192, 192, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(231, 76, 60, 0.7)', 'rgba(155, 89, 182, 0.7)', 'rgba(52, 152, 219, 0.7)'],
                         borderWidth: 1
                     }]
                 },
-                options: { responsive: true, scales: { y: { beginAtZero: true } } }
-            });
-
-            // 工單完成率折線圖
-            const workOrders = rows.map(r => r.工單號碼 || '未知');
-            const rates = rows.map(r => Number((r.完成率 * 100).toFixed(1)));
-
-            const ctxRate = document.getElementById('rateChart').getContext('2d');
-            if (rateChartInstance) rateChartInstance.destroy();
-            rateChartInstance = new Chart(ctxRate, {
-                type: 'line',
-                data: {
-                    labels: workOrders,
-                    datasets: [{
-                        label: '完成率 (%)',
-                        data: rates,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        tension: 0.1,
-                        fill: true
-                    }]
-                },
-                options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+                options: options
             });
         }
 
         window.exportChartAsPNG = function(canvasId, filename) {
-            const canvas = document.getElementById(canvasId);
-            const imageURL = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.href = imageURL;
+            link.href = document.getElementById(canvasId).toDataURL('image/png');
             link.download = filename;
             link.click();
         }
 
         document.getElementById('exportAllChartsBtn').addEventListener('click', () => {
-            exportChartAsPNG('operatorChart', `${currentSheet}_作業人員完成數量統計.png`);
-            setTimeout(() => {
-                exportChartAsPNG('rateChart', `${currentSheet}_工單完成率比較.png`);
-            }, 500);
+            ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'].forEach((id, idx) => {
+                setTimeout(() => exportChartAsPNG(id, `分析圖表_${idx+1}.png`), idx * 300);
+            });
         });
 
-        // 9 & 11. 一鍵匯入與匯出 Excel (工作表名稱比對與新增)
+        // 匯出 Excel
         document.getElementById('exportExcelBtn').addEventListener('click', () => {
             const wb = XLSX.utils.book_new();
             Object.keys(allDataCache).forEach(sheetName => {
-                const sheetData = allDataCache[sheetName];
-                const dataArray = Object.values(sheetData).map(r => ({
-                    "品號": r.品號,
-                    "貨號": r.貨號,
-                    "工單號碼": r.工單號碼,
-                    "數量": r.數量,
-                    "後處理工時(H)": r["後處理工時(H)"],
-                    "單價": r.單價,
-                    "作業人員": r.作業人員,
-                    "預計總價": r.預計總價,
-                    "實際完成數": r.實際完成數,
-                    "實際總價": r.實際總價,
-                    "完成率": r.完成率,
-                    "備註": r.備註 || ""
+                const dataArray = Object.values(allDataCache[sheetName]).map(r => ({
+                    "品號": r.品號, "貨號": r.貨號, "工單號碼": r.工單號碼, "數量": r.數量,
+                    "後處理工時(H)": r["後處理工時(H)"], "單價": r.單價, "作業人員": r.作業人員,
+                    "預計總價": r.預計總價, "實際完成數": r.實際完成數, "實際總價": r.實際總價,
+                    "完成率": r.完成率, "備註": r.備註 || ""
                 }));
-                const ws = XLSX.utils.json_to_sheet(dataArray);
-                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dataArray), sheetName);
             });
-            XLSX.writeFile(wb, "後處理論件計酬統計報表.xlsx");
+            // 順便把入金記錄也包進 Excel
+            const depArray = Object.values(depositsCache).map(d => ({ "日期": d.日期, "入金金額": d.入金金額 }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(depArray), "入金記錄");
+
+            XLSX.writeFile(wb, "後處理論件計酬完整統計報表.xlsx");
         });
 
+        // 匯入 Excel
         document.getElementById('excelFileinput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-
+                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
                 workbook.SheetNames.forEach(sheetName => {
-                    const worksheet = workbook.Sheets[sheetName];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
-                    
+                    if (sheetName === "入金記錄") {
+                        const jsonRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                        const newDeps = {};
+                        jsonRows.forEach((r, idx) => {
+                            newDeps[`dep_${idx}`] = { "日期": r["日期"], "入金金額": Number(r["入金金額"] || 0) };
+                        });
+                        set(ref(db, "deposits"), newDeps);
+                        return;
+                    }
+
+                    const jsonRows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
                     const formattedRows = {};
                     jsonRows.forEach((r, idx) => {
                         const qty = Number(r["數量"] || 0);
@@ -652,27 +782,17 @@
                         const actualComp = Number(r["實際完成數"] || 0);
                         
                         formattedRows[`row_${idx}`] = {
-                            "品號": r["品號"] || "",
-                            "貨號": r["貨號"] || "",
-                            "工單號碼": r["工單號碼"] || "",
-                            "數量": qty,
-                            "後處理工時(H)": hours,
-                            "單價": unitPrice,
-                            "作業人員": r["作業人員"] || "",
-                            "預計總價": qty * unitPrice,
-                            "實際完成數": actualComp,
-                            "實際總價": unitPrice * actualComp,
-                            "完成率": qty > 0 ? (actualComp / qty) : 0,
-                            "備註": r["備註"] || ""
+                            "品號": r["品號"] || "", "貨號": r["貨號"] || "", "工單號碼": r["工單號碼"] || "",
+                            "數量": qty, "後處理工時(H)": hours, "單價": unitPrice,
+                            "作業人員": r["作業人員"] || "", "預計總價": qty * unitPrice,
+                            "實際完成數": actualComp, "實際總價": unitPrice * actualComp,
+                            "完成率": qty > 0 ? (actualComp / qty) : 0, "備註": r["備註"] || ""
                         };
                     });
-
-                    // 規則 11：比對工作表名稱相符則覆蓋/更新，不相符則生成新的對應工作表
                     allDataCache[sheetName] = formattedRows;
                 });
-
                 set(ref(db, "sheets"), allDataCache).then(() => {
-                    alert("Excel 匯入成功！");
+                    alert("Excel 匯入並比對更新成功！");
                     renderApp();
                 });
             };
