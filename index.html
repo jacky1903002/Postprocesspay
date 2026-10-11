@@ -22,8 +22,10 @@
         .dashboard-card h6 { font-size: 0.8rem; margin-bottom: 2px; font-weight: 700; color: #495057; }
         .dashboard-card h3 { font-size: 1.25rem; font-weight: 800; }
         .table-fullscreen-container { min-height: 62vh; max-height: 66vh; overflow-y: auto; }
-        .inline-input { width: 100%; border: 1px solid #ced4da; border-radius: 4px; padding: 2px 5px; font-weight: 700; font-size: 0.9rem; }
-        .inline-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.25); }
+        /* 雙擊編輯樣式 */
+        .editable-cell { cursor: pointer; transition: background-color 0.2s; }
+        .editable-cell:hover { background-color: #e9ecef; }
+        .inline-input { width: 100%; border: 2px solid #3b82f6; border-radius: 4px; padding: 2px 5px; font-weight: 700; font-size: 0.9rem; background: #fff; }
         .modal-fullscreen .modal-content { background-color: #f8f9fa; }
     </style>
 </head>
@@ -100,7 +102,7 @@
             <!-- 功能按鈕群 -->
             <div class="col-xl-5 col-lg-4 text-end">
                 <div class="d-flex justify-content-end gap-2 flex-wrap">
-                    <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#chartsModal">
+                    <button class="btn btn-dark btn-sm fw-heavy px-3 shadow-sm" id="openChartsModalBtn">
                         <i class="fa-solid fa-chart-pie"></i> 生成 6 張分析圖表 (全螢幕)
                     </button>
                     <button class="btn btn-success btn-sm fw-heavy px-3 shadow-sm" id="addNewRowBtn" onclick="addNewRow()">
@@ -332,7 +334,6 @@
             renderTabs();
             renderTable();
             updateDashboard();
-            renderAllCharts();
         }
 
         function renderTabs() {
@@ -400,6 +401,26 @@
             }
         }
 
+        // 雙擊轉為輸入框編輯
+        window.makeEditable = function(tdElement, key, field, type = "text") {
+            if (tdElement.querySelector("input")) return; // 已經在編輯中
+            const currentVal = tdElement.innerText.replace('$', '').replace('%', '').trim();
+            tdElement.innerHTML = `<input type="${type}" class="inline-input" value="${currentVal === '-' ? '' : currentVal}" autofocus>`;
+            const input = tdElement.querySelector("input");
+            
+            const save = () => {
+                let newVal = input.value;
+                updateCellData(key, field, newVal);
+            };
+
+            input.addEventListener("blur", save);
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    save();
+                }
+            });
+        }
+
         window.updateCellData = function(key, field, value) {
             if (currentSheet === "DEPOSITS_PAGE") {
                 if (field === '入金金額') {
@@ -429,6 +450,7 @@
                 row['完成率'] = qty > 0 ? (actualComp / qty) : 0;
 
                 set(ref(db, `sheets/${currentSheet}/${key}`), row).then(() => {
+                    renderTable();
                     updateDashboard();
                 });
             }
@@ -463,8 +485,8 @@
                     totalDeposit += Number(d.入金金額 || 0);
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td><input type="text" class="inline-input" value="${d.日期 || ''}" onchange="updateCellData('${key}', '日期', this.value)"></td>
-                        <td><input type="number" class="inline-input text-success" value="${d.入金金額 || 0}" onchange="updateCellData('${key}', '入金金額', this.value)"></td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '日期')">${d.日期 || ''}</td>
+                        <td class="editable-cell text-success" ondblclick="makeEditable(this, '${key}', '入金金額', 'number')">$${Number(d.入金金額 || 0).toLocaleString()}</td>
                         <td><button class="btn btn-sm btn-outline-danger fw-heavy py-0" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button></td>
                     `;
                     tbody.appendChild(tr);
@@ -513,18 +535,18 @@
                     const ratePercent = ((row.完成率 || 0) * 100).toFixed(1) + "%";
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td><input type="text" class="inline-input" value="${row.品號 || ''}" onchange="updateCellData('${key}', '品號', this.value)"></td>
-                        <td><input type="text" class="inline-input" value="${row.貨號 || ''}" onchange="updateCellData('${key}', '貨號', this.value)"></td>
-                        <td><input type="text" class="inline-input" value="${row.工單號碼 || ''}" onchange="updateCellData('${key}', '工單號碼', this.value)"></td>
-                        <td><input type="number" class="inline-input" value="${row.數量 || 0}" onchange="updateCellData('${key}', '數量', this.value)"></td>
-                        <td><input type="number" step="any" class="inline-input" value="${row["後處理工時(H)"] || 0}" onchange="updateCellData('${key}', '後處理工時(H)', this.value)"></td>
-                        <td class="bg-light fw-bold text-primary">$<span id="unit_${key}">${row.單價 || 0}</span></td>
-                        <td><input type="text" class="inline-input" value="${row.作業人員 || ''}" onchange="updateCellData('${key}', '作業人員', this.value)"></td>
-                        <td class="bg-light fw-bold">$<span id="est_${key}">${row.預計總價 || 0}</span></td>
-                        <td><input type="number" class="inline-input" value="${row.實際完成數 || 0}" onchange="updateCellData('${key}', '實際完成數', this.value)"></td>
-                        <td class="bg-light fw-bold text-success">$<span id="act_${key}">${row.實際總價 || 0}</span></td>
-                        <td class="bg-light"><span class="badge bg-info text-dark fw-heavy" id="rate_${key}">${ratePercent}</span></td>
-                        <td><input type="text" class="inline-input" value="${row.備註 || ''}" onchange="updateCellData('${key}', '備註', this.value)"></td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '品號')">${row.品號 || ''}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '貨號')">${row.貨號 || ''}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '工單號碼')">${row.工單號碼 || ''}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '數量', 'number')">${row.數量 || 0}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '後處理工時(H)', 'number')">${row["後處理工時(H)"] || 0}</td>
+                        <td class="bg-light fw-bold text-primary">$${row.單價 || 0}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '作業人員')">${row.作業人員 || ''}</td>
+                        <td class="bg-light fw-bold">$${row.預計總價 || 0}</td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '實際完成數', 'number')">${row.實際完成數 || 0}</td>
+                        <td class="bg-light fw-bold text-success">$${row.實際總價 || 0}</td>
+                        <td class="bg-light"><span class="badge bg-info text-dark fw-heavy">${ratePercent}</span></td>
+                        <td class="editable-cell" ondblclick="makeEditable(this, '${key}', '備註')">${row.備註 || ''}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-danger fw-heavy py-0 px-2" onclick="deleteRowItem('${key}')"><i class="fa-solid fa-trash"></i> 刪除</button>
                         </td>
@@ -555,6 +577,13 @@
             document.getElementById("totalActualPrice").textContent = "$" + totalActual.toLocaleString();
             document.getElementById("totalEstimatedPrice").textContent = "$" + totalEstimated.toLocaleString();
         }
+
+        // 綁定圖表彈窗按鈕
+        document.getElementById("openChartsModalBtn").addEventListener("click", () => {
+            renderAllCharts();
+            const modal = new bootstrap.Modal(document.getElementById("chartsModal"));
+            modal.show();
+        });
 
         function renderAllCharts() {
             let allRows = [];
@@ -645,7 +674,6 @@
             });
         });
 
-        // 匯出 Excel (並在底部帶入簽收欄位)
         document.getElementById('exportExcelBtn').addEventListener('click', () => {
             const wb = XLSX.utils.book_new();
             Object.keys(allDataCache).forEach(sheetName => {
@@ -655,10 +683,8 @@
                     "預計總價": r.預計總價, "實際完成數": r.實際完成數, "實際總價": r.實際總價,
                     "完成率": r.完成率, "備註": r.備註 || ""
                 }));
-                // 在 Excel 底部加入空白列與簽收欄位
                 dataArray.push({});
                 dataArray.push({ "品號": "簽收人：___________________" });
-
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dataArray), sheetName);
             });
             const depArray = Object.values(depositsCache).map(d => ({ "日期": d.日期, "入金金額": d.入金金額 }));
