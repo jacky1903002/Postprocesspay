@@ -665,9 +665,30 @@
             link.click();
         }
 
+        // 修正：一鍵依序匯出 6 張分析圖表 (加入防呆與錯開下載請求)
         document.getElementById('exportAllChartsBtn').addEventListener('click', () => {
-            ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'].forEach((id, idx) => {
-                setTimeout(() => exportChartAsPNG(id, `分析圖表_${idx+1}.png`), idx * 300);
+            const chartIds = ['chart1', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6'];
+            chartIds.forEach((id, idx) => {
+                const canvas = document.getElementById(id);
+                if (canvas) {
+                    if (chartInstances[id]) {
+                        chartInstances[id].update();
+                    }
+                    setTimeout(() => {
+                        const link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        const titles = [
+                            '1_累積完成品號數量.png',
+                            '2_累計實際發放金額.png',
+                            '3_作業人員累積發放金額.png',
+                            '4_累積實際總發放金額.png',
+                            '5_各分頁完成率統計.png',
+                            '6_累計工時統計.png'
+                        ];
+                        link.download = titles[idx];
+                        link.click();
+                    }, idx * 400);
+                }
             });
         });
 
@@ -740,3 +761,4 @@
     </script>
 </body>
 </html>
+```[cite: 1]
