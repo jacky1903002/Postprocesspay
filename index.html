@@ -244,10 +244,20 @@
 
     <!-- Firebase SDK 10 Modular 與商業邏輯 -->
     <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-       import { firebaseConfig } from "./firebase-config.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5-fDWurERD8zScyENywKa3Sh5pTAPj6k",
+            authDomain: "postprocesspa.firebaseapp.com",
+            projectId: "postprocesspa",
+            storageBucket: "postprocesspa.firebasestorage.app",
+            messagingSenderId: "761514477508",
+            appId: "1:761514477508:web:5ff9dccc6ed7b1de7d4691",
+            measurementId: "G-GNK44CTS8K"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
